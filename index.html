@@ -60,10 +60,6 @@ img {
   cursor: pointer;
   transition: transform 0.3s ease, background 0.3s ease;
 }
-.ippan-btn:hover {
-  background: #444;
-  transform: scale(1.1);
-}
 .ippan-btn.clicked {
   background: #ff5252;
   transform: scale(1.3);
@@ -80,6 +76,25 @@ img {
   color: #ff5252;
   margin-left: 10px;
 }
+.admin {
+  margin-top: 60px;
+  background: #444;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+input, textarea {
+  width: 90%;
+  font-size: 20px;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
 </style>
 </head>
 
@@ -91,8 +106,20 @@ img {
   <button onclick="showRounds()">スタート</button>
 </div>
 
+<div id="adminPanel" style="display:none;">
+  <div class="admin">
+    <h2>管理者専用：回答追加</h2>
+    <input type="text" id="newName" placeholder="名前を入力">
+    <textarea id="newAnswer" placeholder="回答を入力"></textarea>
+    <button onclick="addPerson()">追加</button>
+    <button onclick="hideAdmin()">閉じる</button>
+  </div>
+</div>
+
 <script>
 let currentRound = null;
+
+// ★ 票データ
 let people = {
   "カースト最下層さん": { answer: "へ〜まだあるんだ", count: 0 },
   "受水槽室さん": { answer: "すいません隣の席も埋まってるんですよ〜。", count: 0 },
@@ -103,7 +130,8 @@ let people = {
   "玉野筋男さん": { answer: "実は青いところが本体です。", count: 0 }
 };
 
-let voted = {}; // 一人一回制
+// ★ 押したかどうか（取り消し対応）
+let voted = {};
 
 function showRounds() {
   currentRound = null;
@@ -112,7 +140,25 @@ function showRounds() {
   for (let i = 1; i <= 20; i++) {
     html += `<button onclick="showRound(${i})">第${i}回</button>`;
   }
+  html += `<button style="background:#555;" onclick="adminLogin()">管理者専用</button>`;
   document.getElementById("menu").innerHTML = html;
+}
+
+function adminLogin() {
+  let pw = prompt("パスワードを入力してください");
+  if (pw === "1919") {
+    showAdmin();
+  } else {
+    alert("パスワードが違います");
+  }
+}
+
+function showAdmin() {
+  document.getElementById("adminPanel").style.display = "block";
+}
+
+function hideAdmin() {
+  document.getElementById("adminPanel").style.display = "none";
 }
 
 function showRound(n) {
@@ -137,6 +183,7 @@ function showRound(n) {
 function showPerson(name) {
   document.getElementById("title").innerText = "IPPAN-GP";
   let data = people[name];
+
   document.getElementById("menu").innerHTML = `
     <div class="name">${name} <span class="count">(${data.count})</span></div>
     <br>
@@ -148,19 +195,44 @@ function showPerson(name) {
 }
 
 function vote(name, btn) {
-  if (voted[name]) {
-    alert("この人にはもう押せません！");
-    return;
+  // ★ 押してない → 押す（+1）
+  if (!voted[name]) {
+    voted[name] = true;
+    people[name].count++;
+    btn.classList.add("clicked");
+    btn.innerText = "★";
+    setTimeout(() => {
+      btn.innerText = "IPPAN";
+      btn.classList.remove("clicked");
+    }, 800);
+  } 
+  // ★ 押してる → 取り消し（-1）
+  else {
+    voted[name] = false;
+    people[name].count--;
+    btn.classList.add("clicked");
+    btn.innerText = "✕";
+    setTimeout(() => {
+      btn.innerText = "IPPAN";
+      btn.classList.remove("clicked");
+    }, 800);
   }
-  voted[name] = true;
-  people[name].count++;
-  btn.classList.add("clicked");
-  btn.innerText = "★";
-  setTimeout(() => {
-    btn.innerText = "IPPAN";
-    btn.classList.remove("clicked");
-  }, 800);
-  showPerson(name); // 更新して数字反映
+
+  // 表示更新
+  showPerson(name);
+}
+
+function addPerson() {
+  const name = document.getElementById("newName").value.trim();
+  const answer = document.getElementById("newAnswer").value.trim();
+  if (name && answer) {
+    people[name] = { answer: answer, count: 0 };
+    alert(`「${name}」を追加しました！`);
+    document.getElementById("newName").value = "";
+    document.getElementById("newAnswer").value = "";
+  } else {
+    alert("名前と回答を入力してください。");
+  }
 }
 </script>
 
