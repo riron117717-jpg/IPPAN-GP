@@ -122,6 +122,7 @@ input, select, textarea {
   let people = {};
   let currentRound = null;
 
+  // Firestoreから読み込み
   async function loadPeople() {
     const querySnapshot = await getDocs(collection(db, "people"));
     people = {};
@@ -132,6 +133,7 @@ input, select, textarea {
     showRounds();
   }
 
+  // 管理者追加・更新
   async function adminAdd() {
     const round = document.getElementById("adminRound").value;
     const selectedName = document.getElementById("adminNameSelect").value;
@@ -145,7 +147,6 @@ input, select, textarea {
       return;
     }
 
-    // 既存データを探す
     const querySnapshot = await getDocs(collection(db, "people"));
     let foundId = null;
     querySnapshot.forEach((docSnap) => {
@@ -169,6 +170,18 @@ input, select, textarea {
     }
 
     alert(`第${round}回に「${finalName}」を登録しました！`);
+    loadPeople();
+  }
+
+  // 投票クラウド化
+  async function vote(name) {
+    const querySnapshot = await getDocs(collection(db, "people"));
+    querySnapshot.forEach(async (docSnap) => {
+      if (docSnap.data().name === name) {
+        const newCount = (docSnap.data().count || 0) + 1;
+        await updateDoc(doc(db, "people", docSnap.id), { count: newCount });
+      }
+    });
     loadPeople();
   }
 
@@ -218,7 +231,6 @@ input, select, textarea {
     document.getElementById("title").innerText = `第${n}回`;
 
     let html = "";
-
     html += `<div class="name">第${n}回</div><br><img src="IMG_8067.jpeg">`;
 
     for (let name in people) {
@@ -240,6 +252,8 @@ input, select, textarea {
       <br>
       <img src="IMG_8067.jpeg">
       <div class="answer">${data.answer}</div>
+
+      <button onclick="vote('${name}')">投票する</button>
       <button onclick="showRound(${currentRound})">戻る</button>
     `;
   }
