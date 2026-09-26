@@ -13,7 +13,7 @@ body {
 }
 h1 {
   font-size: 60px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 button {
   display: block;
@@ -44,10 +44,9 @@ img {
   border-radius: 10px;
   margin-top: 40px;
 }
+
+/* IPPANボタン */
 .ippan-btn {
-  position: relative;
-  display: inline-block;
-  margin-top: 25px;
   background: #222;
   color: white;
   font-size: 22px;
@@ -56,7 +55,7 @@ img {
   width: 80px;
   height: 80px;
   line-height: 80px;
-  text-align: center;
+  margin: 25px auto 10px;
   cursor: pointer;
   transition: transform 0.3s ease, background 0.3s ease;
 }
@@ -70,30 +69,45 @@ img {
   70% { box-shadow: 0 0 0 20px rgba(255,82,82,0); }
   100% { box-shadow: 0 0 0 0 rgba(255,82,82,0); }
 }
-.count {
-  font-size: 26px;
-  font-weight: bold;
-  color: #ff5252;
-  margin-left: 10px;
+
+/* 取り消しボタン */
+.cancel-btn {
+  background: #666;
+  color: white;
+  font-size: 20px;
+  padding: 12px;
+  width: 150px;
+  margin: 10px auto;
+  border-radius: 10px;
 }
-.admin {
-  margin-top: 60px;
+
+/* 管理者画面 */
+#adminPanel {
+  display: none;
+  margin-top: 20px;
+}
+.admin-box {
   background: #444;
   color: white;
-  padding: 15px;
+  padding: 20px;
   border-radius: 10px;
   width: 90%;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 450px;
+  margin: 0 auto;
 }
-input, textarea {
+input, select, textarea {
   width: 90%;
   font-size: 20px;
   margin: 10px 0;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
+}
+.count {
+  font-size: 26px;
+  font-weight: bold;
+  color: #ff5252;
+  margin-left: 10px;
 }
 </style>
 </head>
@@ -102,18 +116,28 @@ input, textarea {
 
 <h1 id="title">IPPAN-GP</h1>
 
-<div id="menu">
-  <button onclick="showRounds()">スタート</button>
-</div>
+<!-- 管理者画面（タイトルの下に隠す） -->
+<div id="adminPanel">
+  <div class="admin-box">
+    <h2>管理者専用</h2>
 
-<div id="adminPanel" style="display:none;">
-  <div class="admin">
-    <h2>管理者専用：回答追加</h2>
-    <input type="text" id="newName" placeholder="名前を入力">
-    <textarea id="newAnswer" placeholder="回答を入力"></textarea>
-    <button onclick="addPerson()">追加</button>
+    <label>第何回</label>
+    <input type="number" id="adminRound" placeholder="例：2">
+
+    <label>名前（既存＋新規追加）</label>
+    <select id="adminNameSelect"></select>
+    <input type="text" id="adminNewName" placeholder="新しい名前を追加">
+
+    <label>回答</label>
+    <textarea id="adminAnswer" placeholder="回答を入力"></textarea>
+
+    <button onclick="adminAdd()">追加 / 更新</button>
     <button onclick="hideAdmin()">閉じる</button>
   </div>
+</div>
+
+<div id="menu">
+  <button onclick="showRounds()">スタート</button>
 </div>
 
 <script>
@@ -136,6 +160,7 @@ let voted = {};
 function showRounds() {
   currentRound = null;
   document.getElementById("title").innerText = "IPPAN-GP";
+
   let html = "";
   for (let i = 1; i <= 20; i++) {
     html += `<button onclick="showRound(${i})">第${i}回</button>`;
@@ -154,11 +179,36 @@ function adminLogin() {
 }
 
 function showAdmin() {
+  // 既存の名前をセレクトに入れる
+  let sel = document.getElementById("adminNameSelect");
+  sel.innerHTML = "";
+  for (let name in people) {
+    sel.innerHTML += `<option value="${name}">${name}</option>`;
+  }
+
   document.getElementById("adminPanel").style.display = "block";
 }
 
 function hideAdmin() {
   document.getElementById("adminPanel").style.display = "none";
+}
+
+function adminAdd() {
+  const round = document.getElementById("adminRound").value;
+  const selectedName = document.getElementById("adminNameSelect").value;
+  const newName = document.getElementById("adminNewName").value.trim();
+  const answer = document.getElementById("adminAnswer").value.trim();
+
+  let finalName = newName || selectedName;
+
+  if (!round || !finalName || !answer) {
+    alert("全部入力してね");
+    return;
+  }
+
+  people[finalName] = { answer: answer, count: people[finalName]?.count || 0 };
+
+  alert(`第${round}回に「${finalName}」を登録しました！`);
 }
 
 function showRound(n) {
@@ -189,50 +239,44 @@ function showPerson(name) {
     <br>
     <img src="IMG_8067.jpeg">
     <div class="answer">${data.answer}</div>
+
     <div class="ippan-btn" onclick="vote('${name}', this)">IPPAN</div>
+    <div class="cancel-btn" onclick="cancelVote('${name}')">取り消し</div>
+
     <button onclick="showRound(${currentRound})">戻る</button>
   `;
 }
 
 function vote(name, btn) {
-  // ★ 押してない → 押す（+1）
-  if (!voted[name]) {
-    voted[name] = true;
-    people[name].count++;
-    btn.classList.add("clicked");
-    btn.innerText = "★";
-    setTimeout(() => {
-      btn.innerText = "IPPAN";
-      btn.classList.remove("clicked");
-    }, 800);
-  } 
-  // ★ 押してる → 取り消し（-1）
-  else {
-    voted[name] = false;
-    people[name].count--;
-    btn.classList.add("clicked");
-    btn.innerText = "✕";
-    setTimeout(() => {
-      btn.innerText = "IPPAN";
-      btn.classList.remove("clicked");
-    }, 800);
+  if (voted[name]) {
+    alert("すでに押してます。取り消しボタンを使ってね");
+    return;
   }
 
-  // 表示更新
+  voted[name] = true;
+  people[name].count++;
+
+  btn.classList.add("clicked");
+  btn.innerText = "★";
+
+  setTimeout(() => {
+    btn.innerText = "IPPAN";
+    btn.classList.remove("clicked");
+  }, 800);
+
   showPerson(name);
 }
 
-function addPerson() {
-  const name = document.getElementById("newName").value.trim();
-  const answer = document.getElementById("newAnswer").value.trim();
-  if (name && answer) {
-    people[name] = { answer: answer, count: 0 };
-    alert(`「${name}」を追加しました！`);
-    document.getElementById("newName").value = "";
-    document.getElementById("newAnswer").value = "";
-  } else {
-    alert("名前と回答を入力してください。");
+function cancelVote(name) {
+  if (!voted[name]) {
+    alert("まだ押してないよ");
+    return;
   }
+
+  voted[name] = false;
+  people[name].count--;
+
+  showPerson(name);
 }
 </script>
 
