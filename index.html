@@ -21,7 +21,6 @@
     .text-shadow {
       text-shadow: 2px 2px 0px #000;
     }
-    /* カスタムスクロールバー */
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -30,11 +29,11 @@
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col items-center pb-20">
 
-  <header class="w-full max-w-2xl mx-auto pt-10 pb-6 px-4 text-center relative relative">
-    <h1 class="text-5xl md:text-6xl font-black text-yellow-400 text-shadow mb-2 tracking-wider">IPPAN-GP</h1>
-    <p class="text-gray-500 font-semibold mb-6">みんなで選ぶ、最高の一答</p>
+  <header class="w-full max-w-2xl mx-auto pt-10 pb-6 px-4 text-center relative">
+    <h1 class="text-5xl md:text-6xl font-black text-yellow-400 text-shadow mb-2 tracking-wider cursor-pointer" onclick="app.navigate('rounds')">IPPAN-GP</h1>
+    <p class="text-gray-500 font-semibold mb-6">ã¿ããªã§é¸ã¶ãæé«ã®ä¸ç­</p>
     
-    <!-- 管理者ボタン -->
+    <!-- ç®¡çèãã¿ã³ -->
     <button onclick="app.showAdminLogin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-2 rounded-full transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -43,87 +42,102 @@
     </button>
   </header>
 
-  <!-- メインコンテンツ領域 -->
-  <main id="appContainer" class="w-full max-w-2xl px-4 w-full"></main>
+  <!-- ã¡ã¤ã³ã³ã³ãã³ãé å -->
+  <main id="appContainer" class="w-full max-w-2xl px-4"></main>
 
-  <!-- トースト通知 -->
-  <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
+  <!-- ãã¼ã¹ãéç¥ -->
+  <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300 z-50 font-bold"></div>
 
-  <!-- 確認/入力用 モーダル (alert, confirm, promptの代替) -->
+  <!-- ç¢ºèª/å¥åç¨ ã¢ã¼ãã« -->
   <div id="dialogModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden opacity-0 transition-opacity">
     <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl transform scale-95 transition-transform duration-200" id="dialogContent">
-      <h3 id="dialogMessage" class="text-lg font-bold text-gray-800 mb-4 text-center"></h3>
-      <input type="text" id="dialogInput" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 mb-4 hidden focus:outline-none focus:border-yellow-400" />
+      <h3 id="dialogMessage" class="text-lg font-bold text-gray-800 mb-4 text-center whitespace-pre-wrap"></h3>
+      <input type="text" id="dialogInput" class="w-full border-2 border-gray-200 rounded-lg px-4 py-2 mb-4 hidden focus:outline-none focus:border-yellow-400 font-semibold" />
       <div class="flex justify-center gap-3">
-        <button id="dialogCancel" class="px-5 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition hidden">キャンセル</button>
+        <button id="dialogCancel" class="px-5 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition hidden">ã­ã£ã³ã»ã«</button>
         <button id="dialogConfirm" class="px-5 py-2 bg-yellow-400 text-gray-900 font-bold rounded-lg hover:bg-yellow-500 transition w-full shadow-sm">OK</button>
       </div>
     </div>
   </div>
 
-  <!-- 管理者パネル モーダル -->
-  <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 hidden overflow-y-auto pt-10 pb-10">
-    <div class="bg-white rounded-2xl p-6 w-[95%] max-w-md shadow-2xl relative my-auto">
-      <button onclick="app.hideAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+  <!-- ç®¡çèããã« ã¢ã¼ãã« -->
+  <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-40 hidden overflow-y-auto py-10">
+    <div class="bg-white rounded-2xl p-6 w-[95%] max-w-lg shadow-2xl relative my-auto">
+      <button onclick="app.hideAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 bg-gray-100 p-2 rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
       <h2 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-2">
         <svg class="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
-        管理者コントロール
+        ç®¡çèã³ã³ãã­ã¼ã«
       </h2>
 
-      <div class="space-y-5">
-        <div>
-          <label class="block text-sm font-bold text-gray-600 mb-1">対象の回（ラウンド）</label>
-          <select id="adminRound" class="w-full bg-gray-50 border-2 border-gray-200 text-gray-800 rounded-lg p-3 font-semibold focus:border-yellow-400 focus:outline-none"></select>
-        </div>
-
-        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-          <label class="block text-sm font-bold text-gray-600 mb-2">操作モード</label>
-          <div class="flex gap-4 mb-4">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="adminMode" value="new" checked onchange="app.toggleAdminMode()" class="text-yellow-500 focus:ring-yellow-500 w-4 h-4">
-              <span class="font-semibold text-gray-700">新規追加</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="adminMode" value="update" onchange="app.toggleAdminMode()" class="text-yellow-500 focus:ring-yellow-500 w-4 h-4">
-              <span class="font-semibold text-gray-700">既存の更新</span>
-            </label>
-          </div>
-
-          <div id="newPersonArea">
-            <label class="block text-xs font-bold text-gray-500 mb-1">名前</label>
-            <input type="text" id="adminNewName" placeholder="名前を入力" class="w-full border-2 border-gray-200 rounded-lg p-3 font-semibold focus:border-yellow-400 focus:outline-none">
-          </div>
-          <div id="updatePersonArea" class="hidden">
-            <label class="block text-xs font-bold text-gray-500 mb-1">既存のメンバー</label>
-            <select id="adminNameSelect" class="w-full border-2 border-gray-200 rounded-lg p-3 font-semibold focus:border-yellow-400 focus:outline-none"></select>
+      <div class="space-y-6">
+        <!-- å±éï¼å¯¾è±¡ã®å -->
+        <div class="bg-gray-100 p-4 rounded-xl">
+          <label class="block text-sm font-bold text-gray-700 mb-2">â¼ æä½ããåï¼ã©ã¦ã³ãï¼ãé¸æ</label>
+          <div class="flex gap-2">
+            <select id="adminRound" onchange="app.onAdminRoundChange()" class="flex-1 bg-white border-2 border-gray-300 text-gray-800 rounded-lg p-3 font-black text-lg focus:border-yellow-400 focus:outline-none"></select>
+            <button onclick="app.adminAddRound()" class="bg-blue-100 text-blue-700 px-4 rounded-lg font-bold border border-blue-200 hover:bg-blue-200">åãè¿½å </button>
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-bold text-gray-600 mb-1">回答</label>
-          <textarea id="adminAnswer" rows="3" placeholder="回答を入力してください" class="w-full bg-gray-50 border-2 border-gray-200 rounded-lg p-3 font-bold text-lg focus:border-yellow-400 focus:outline-none resize-none"></textarea>
+        <!-- ã»ã¯ã·ã§ã³1ï¼ãé¡ã»ç»åã®è¨­å® -->
+        <div class="bg-blue-50 border-2 border-blue-100 p-4 rounded-xl relative">
+          <span class="absolute -top-3 left-4 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded">â  ãé¡ã»ç»åã®è¨­å®</span>
+          <div class="space-y-3 mt-2">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1">ãé¡ã®æï¼è³ªåï¼</label>
+              <textarea id="adminRoundTitle" rows="2" placeholder="ä¾ï¼ãããªIPPAN-GPã¯å«ã ãã©ããªã®ï¼" class="w-full border-2 border-gray-200 rounded-lg p-2 font-semibold focus:border-blue-400 focus:outline-none resize-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1">ç»åURL (http://... ãããã¯ç©ºæ¬)</label>
+              <input type="text" id="adminRoundImage" placeholder="ç»åã®ãªã³ã¯URL" class="w-full border-2 border-gray-200 rounded-lg p-2 font-semibold focus:border-blue-400 focus:outline-none text-sm">
+            </div>
+            <button onclick="app.adminSaveRound()" class="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition shadow-sm">ãé¡ã¨ç»åãä¿å­</button>
+          </div>
         </div>
 
-        <div class="pt-2">
-          <button onclick="app.adminSubmit()" class="w-full bg-gray-800 text-white font-bold py-3 rounded-lg shadow hover:bg-gray-900 transition">保存する</button>
+        <!-- ã»ã¯ã·ã§ã³2ï¼åç­ã®è¿½å ã»æ´æ° -->
+        <div class="bg-gray-50 border-2 border-gray-200 p-4 rounded-xl relative">
+          <span class="absolute -top-3 left-4 bg-gray-600 text-white text-xs font-bold px-2 py-1 rounded">â¡ åç­ã®è¿½å ã»æ´æ°</span>
+          <div class="space-y-3 mt-2">
+            <div class="flex gap-4 mb-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="adminMode" value="new" checked onchange="app.toggleAdminMode()" class="w-4 h-4 text-gray-800 focus:ring-gray-800">
+                <span class="font-bold text-gray-700 text-sm">æ°ããäººã®åç­</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="adminMode" value="update" onchange="app.toggleAdminMode()" class="w-4 h-4 text-gray-800 focus:ring-gray-800">
+                <span class="font-bold text-gray-700 text-sm">æ¢å­ã®åç­ãä¿®æ­£</span>
+              </label>
+            </div>
+
+            <div id="newPersonArea">
+              <input type="text" id="adminNewName" placeholder="ååãå¥å" class="w-full border-2 border-gray-200 rounded-lg p-2 font-semibold focus:border-gray-400 focus:outline-none">
+            </div>
+            <div id="updatePersonArea" class="hidden">
+              <select id="adminNameSelect" class="w-full border-2 border-gray-200 rounded-lg p-2 font-semibold focus:border-gray-400 focus:outline-none"></select>
+            </div>
+            
+            <div>
+              <textarea id="adminAnswer" rows="2" placeholder="åç­ãå¥å" class="w-full border-2 border-gray-200 rounded-lg p-2 font-bold text-lg focus:border-gray-400 focus:outline-none resize-none"></textarea>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="app.adminSubmitAnswer()" class="flex-1 bg-gray-800 text-white font-bold py-2 rounded-lg hover:bg-gray-900 transition shadow-sm">åç­ãä¿å­</button>
+              <button onclick="app.adminDeleteAnswer()" class="bg-red-100 text-red-600 px-4 rounded-lg font-bold border border-red-200 hover:bg-red-200 text-sm">åé¤</button>
+            </div>
+          </div>
         </div>
 
-        <hr class="my-4 border-gray-200">
-        
-        <div class="flex flex-col gap-2">
-          <button onclick="app.adminDelete()" class="w-full bg-red-50 text-red-600 border border-red-200 font-bold py-2 rounded-lg hover:bg-red-100 transition">選択したメンバーを削除</button>
-          <button onclick="app.adminAddRound()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-bold py-2 rounded-lg hover:bg-blue-100 transition">お題（回）を追加する</button>
-        </div>
       </div>
     </div>
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, addDoc, updateDoc, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
+    // ã¦ã¼ã¶ã¼æå®ã®Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBbtqNnXTnTUywEh_ygQbR-Sbf6C0vXxxY",
       authDomain: "ippan-gp.firebaseapp.com",
@@ -134,21 +148,21 @@
       measurementId: "G-3LWRC1MHCG"
     };
 
-    // Firebaseの初期化
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
 
-    // アプリケーションの状態
+    // ã¢ããªã±ã¼ã·ã§ã³ã®ç¶æ
     const state = {
-      people: [], // { id, name, answer, count, round }
-      maxRound: 20, // デフォルトの最大ラウンド
-      currentView: 'rounds', // 'rounds', 'roundDetail', 'personDetail'
+      people: [],     // åç­èã®ãã¼ã¿ { id, name, answer, count, round }
+      roundsData: [], // ãé¡ã¨ç»åã®ãã¼ã¿ { id, round, title, imageUrl }
+      maxRound: 20,   // ããã©ã«ãã®æå¤§ã©ã¦ã³ã
+      currentView: 'rounds', // ç»é¢ç¶æ: 'rounds', 'roundDetail', 'personDetail'
       currentRound: null,
       currentPersonId: null,
       isReady: false
     };
 
-    // カスタムUIヘルパー（alert, confirm, promptの代替）
+    // ã«ã¹ã¿ã UIãã«ãã¼ï¼alert, confirm, promptã®ä»£æ¿ï¼
     const UI = {
       toast: (msg) => {
         const el = document.getElementById('toast');
@@ -166,8 +180,6 @@
           const confirmBtn = document.getElementById('dialogConfirm');
 
           msgEl.textContent = msg;
-          
-          // Reset
           inputEl.value = '';
           inputEl.classList.add('hidden');
           cancelBtn.classList.add('hidden');
@@ -182,7 +194,6 @@
             cancelBtn.classList.remove('hidden');
           }
 
-          // Cleanup handlers
           const cleanup = () => {
             modal.classList.add('opacity-0');
             setTimeout(() => {
@@ -216,39 +227,37 @@
     };
 
     const app = {
-      // 初期化処理
-      init: async () => {
-        try {
-          // Firestoreからのリアルタイム同期設定
-          const peopleRef = collection(db, "people");
-          onSnapshot(peopleRef, (snapshot) => {
-            state.people = [];
-            let foundMax = 20;
-            snapshot.forEach((docSnap) => {
-              const data = docSnap.data();
-              state.people.push({ id: docSnap.id, ...data });
-              if (data.round > foundMax) foundMax = data.round;
-            });
-            // 手動追加分がリセットされないよう大きい方を採用
-            state.maxRound = Math.max(state.maxRound, foundMax); 
-            state.isReady = true;
-            app.render(); // データが更新されたら再描画
-          }, (error) => {
-            console.error("Firestore Error:", error);
-            UI.toast("データの読み込みに失敗しました。Firestoreのルールを確認してください。");
+      init: () => {
+        // 1. peopleã³ã¬ã¯ã·ã§ã³ã®ç£è¦ (åç­ãã¼ã¿)
+        const peopleRef = collection(db, "people");
+        onSnapshot(peopleRef, (snapshot) => {
+          state.people = [];
+          let foundMax = 20;
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            state.people.push({ id: docSnap.id, ...data });
+            if (data.round > foundMax) foundMax = data.round;
           });
-        } catch (e) {
-          console.error("Init Error:", e);
-          UI.alert("初期化エラーが発生しました。");
-        }
+          state.maxRound = Math.max(state.maxRound, foundMax); 
+          state.isReady = true;
+          app.render();
+        }, (e) => console.error(e));
+
+        // 2. roundsã³ã¬ã¯ã·ã§ã³ã®ç£è¦ (ãé¡ã»ç»åãã¼ã¿)
+        const roundsRef = collection(db, "rounds");
+        onSnapshot(roundsRef, (snapshot) => {
+          state.roundsData = [];
+          snapshot.forEach((docSnap) => {
+            state.roundsData.push({ id: docSnap.id, ...docSnap.data() });
+          });
+          app.render(); // ãé¡æå ±ãæ´æ°ããããåæç»
+        }, (e) => console.error(e));
       },
 
-      // 画面の描画ルーティング
       render: () => {
         if (!state.isReady) return;
         const container = document.getElementById('appContainer');
-        container.innerHTML = ''; // クリア
-
+        
         if (state.currentView === 'rounds') {
           container.innerHTML = app.templates.rounds();
         } else if (state.currentView === 'roundDetail') {
@@ -258,30 +267,58 @@
           if (person) {
             container.innerHTML = app.templates.personDetail(person);
           } else {
-            app.navigate('rounds'); // 万が一削除された場合戻る
+            app.navigate('rounds');
           }
         }
       },
 
-      // 画面遷移
       navigate: (view, param = null) => {
         state.currentView = view;
         if (view === 'roundDetail') state.currentRound = param;
         if (view === 'personDetail') state.currentPersonId = param;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         app.render();
       },
 
-      // HTMLテンプレート群
       templates: {
+        // ãã«ãã¼ï¼å¯¾è±¡ã®åã®ç»åãã¿ã¤ãã«ãæç»ããããã®HTMLçæ
+        getRoundMediaHtml: (roundNum) => {
+          const rData = state.roundsData.find(r => r.round === roundNum);
+          let html = '';
+          if (rData) {
+            if (rData.title) {
+              html += `<div class="bg-gray-800 text-white p-4 md:p-6 rounded-2xl mb-6 shadow-md border-l-4 border-yellow-400">
+                         <p class="text-lg md:text-xl font-bold whitespace-pre-wrap">${rData.title}</p>
+                       </div>`;
+            }
+            if (rData.imageUrl) {
+              const fallback = "https://placehold.co/600x400/eeeeee/888888?text=Image+Not+Found";
+              html += `<img src="${rData.imageUrl}" onerror="this.onerror=null;this.src='${fallback}';" class="w-full rounded-2xl shadow-sm mb-6 object-cover border-2 border-white bg-gray-200" alt="ãé¡ç»å">`;
+            }
+          }
+          return html;
+        },
+
         rounds: () => {
           let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 fade-in">`;
           for (let i = 1; i <= state.maxRound; i++) {
-            // その回に参加者がいるかカウント
             const count = state.people.filter(p => p.round === i).length;
+            const rData = state.roundsData.find(r => r.round === i);
+            let titleSnippet = '';
+            if (rData && rData.title) {
+              // ãé¡æã®ä¸é¨ããµã ãã¤ã«è¡¨ç¤º
+              const shortTitle = rData.title.length > 15 ? rData.title.substring(0, 15) + '...' : rData.title;
+              titleSnippet = `<div class="text-xs text-gray-500 mt-2 bg-gray-50 p-1 rounded border border-gray-100">${shortTitle}</div>`;
+            }
+
             html += `
-              <button onclick="app.navigate('roundDetail', ${i})" class="bg-white hover:bg-yellow-50 border-2 border-gray-200 hover:border-yellow-400 p-6 rounded-2xl shadow-sm transition-all transform hover:-translate-y-1 group">
-                <div class="text-xl font-bold text-gray-800 group-hover:text-yellow-600">第${i}回</div>
-                <div class="text-xs text-gray-400 mt-2 font-semibold">${count} 人の回答</div>
+              <button onclick="app.navigate('roundDetail', ${i})" class="bg-white hover:bg-yellow-50 border-2 border-gray-200 hover:border-yellow-400 p-4 sm:p-6 rounded-2xl shadow-sm transition-all transform hover:-translate-y-1 group text-left">
+                <div class="text-xl font-black text-gray-800 group-hover:text-yellow-600">ç¬¬${i}å</div>
+                <div class="text-xs text-gray-400 mt-1 font-semibold flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                  ${count} ä»¶ã®åç­
+                </div>
+                ${titleSnippet}
               </button>
             `;
           }
@@ -295,33 +332,31 @@
           let html = `
             <div class="fade-in max-w-lg mx-auto">
               <div class="flex items-center justify-between mb-6">
-                <button onclick="app.navigate('rounds')" class="text-gray-500 hover:text-gray-800 font-semibold flex items-center gap-1 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                  戻る
+                <button onclick="app.navigate('rounds')" class="text-gray-600 hover:text-gray-900 font-bold flex items-center gap-1 bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                  ä¸è¦§ã¸
                 </button>
-                <h2 class="text-2xl font-black text-gray-800">第${roundNum}回</h2>
-                <div class="w-20"></div><!-- スペーサー -->
+                <h2 class="text-3xl font-black text-gray-800 tracking-wider">ç¬¬${roundNum}å</h2>
+                <div class="w-24"></div>
               </div>
           `;
 
-          // 第2回限定の画像表示
-          if (roundNum === 2) {
-            // 代替のプレースホルダー画像（元の画像が読み込めない環境を考慮）
-            const imgSrc = "IMG_8067.jpeg";
-            const fallbackSrc = "https://placehold.co/600x400/eeeeee/888888?text=Question+Image";
-            html += `<img src="${imgSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}';" class="w-full rounded-xl shadow-md border-2 border-white mb-8 object-cover" alt="お題画像">`;
-          }
+          // ãé¡æã¨ç»åã®æç»
+          html += app.templates.getRoundMediaHtml(roundNum);
 
           if (participants.length === 0) {
-            html += `<div class="text-center py-10 text-gray-400 font-semibold bg-white rounded-xl shadow-sm border border-gray-100">まだ回答がありません</div>`;
+            html += `<div class="text-center py-12 text-gray-400 font-bold bg-white rounded-2xl shadow-sm border border-gray-100">ã¾ã åç­ãããã¾ãã</div>`;
           } else {
+            // ç²å¾ç¥¨æ°ãå¤ãé ã«ã½ã¼ããã¦è¡¨ç¤º
+            participants.sort((a, b) => (b.count || 0) - (a.count || 0));
             html += `<div class="space-y-4">`;
             participants.forEach(p => {
               html += `
-                <button onclick="app.navigate('personDetail', '${p.id}')" class="w-full bg-white border border-gray-200 hover:border-yellow-400 p-5 rounded-xl shadow-sm hover:shadow-md transition-all flex justify-between items-center group">
-                  <span class="text-xl font-bold text-gray-700 group-hover:text-yellow-600">${p.name}</span>
-                  <span class="bg-gray-100 text-gray-600 font-black px-4 py-1.5 rounded-full group-hover:bg-yellow-100 group-hover:text-yellow-700 transition-colors">
-                    ${p.count || 0} 票
+                <button onclick="app.navigate('personDetail', '${p.id}')" class="w-full bg-white border border-gray-200 hover:border-yellow-400 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all flex justify-between items-center group text-left">
+                  <span class="text-xl font-black text-gray-800 group-hover:text-yellow-600 truncate mr-4">${p.name}</span>
+                  <span class="bg-gray-100 text-gray-600 font-black px-4 py-1.5 rounded-full group-hover:bg-yellow-100 group-hover:text-yellow-700 transition-colors shrink-0 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                    ${p.count || 0} ç¥¨
                   </span>
                 </button>
               `;
@@ -333,99 +368,120 @@
         },
 
         personDetail: (person) => {
-          const imgSrc = "IMG_8067.jpeg";
-          const fallbackSrc = "https://placehold.co/600x400/eeeeee/888888?text=Question+Image";
-          
+          // localStorageã§æç¥¨æ¸ã¿ããã§ãã¯ (ã­ã¼ä¾: ippangp_voted_personId)
+          const storageKey = `ippangp_voted_${person.id}`;
+          const hasVoted = localStorage.getItem(storageKey);
+
+          let voteButtonHtml = '';
+          if (hasVoted) {
+            // æç¥¨æ¸ã¿ã®ã°ã¬ã¼ã¢ã¦ããã¿ã³
+            voteButtonHtml = `
+              <button disabled class="w-full bg-gray-300 text-gray-500 text-xl font-black py-5 rounded-2xl shadow-inner flex items-center justify-center gap-2 cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                æç¥¨æ¸ã¿ (1åã¾ã§)
+              </button>
+            `;
+          } else {
+            // æç¥¨å¯è½ãã¿ã³
+            voteButtonHtml = `
+              <button onclick="app.vote('${person.id}')" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xl font-black py-5 rounded-2xl shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
+                ä¸æ¬ï¼ (æç¥¨ãã)
+              </button>
+            `;
+          }
+
           return `
-            <div class="fade-in max-w-lg mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+            <div class="fade-in max-w-lg mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
               <div class="flex items-center justify-between mb-6">
-                <button onclick="app.navigate('roundDetail', ${person.round})" class="text-gray-500 hover:text-gray-800 font-semibold flex items-center gap-1 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                  一覧へ
+                <button onclick="app.navigate('roundDetail', ${person.round})" class="text-gray-600 hover:text-gray-900 font-bold flex items-center gap-1 bg-gray-50 px-4 py-2 rounded-xl border border-gray-200 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                  æ»ã
                 </button>
-                <div class="text-sm font-bold text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">第${person.round}回</div>
+                <div class="text-sm font-black text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full border border-yellow-300">ç¬¬${person.round}å</div>
               </div>
 
-              <div class="flex items-end gap-3 mb-6 border-b-2 border-gray-100 pb-4">
-                <h3 class="text-3xl font-black text-gray-800">${person.name}</h3>
-                <div class="text-lg font-bold text-gray-400 mb-1 flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+              <!-- åç­èåã¨å¾ç¥¨æ° -->
+              <div class="flex items-end justify-between gap-3 mb-6 border-b-2 border-gray-100 pb-4">
+                <h3 class="text-3xl font-black text-gray-800 break-all">${person.name} <span class="text-lg text-gray-500 font-bold">ããã®åç­</span></h3>
+                <div class="text-xl font-black text-yellow-500 bg-yellow-50 px-3 py-2 rounded-xl border border-yellow-100 flex items-center gap-1 shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                   ${person.count || 0}
                 </div>
               </div>
 
-              <img src="${imgSrc}" onerror="this.onerror=null;this.src='${fallbackSrc}';" class="w-full rounded-xl shadow-inner mb-8 bg-gray-100" alt="お題画像">
+              <!-- ãé¡ã¨ç»å -->
+              ${app.templates.getRoundMediaHtml(person.round)}
 
-              <div class="bg-gray-800 text-white p-8 rounded-2xl mb-8 relative shadow-lg">
-                <div class="absolute -top-4 -left-2 text-6xl text-yellow-400 font-serif opacity-50">"</div>
-                <p class="text-2xl md:text-3xl font-black text-center leading-relaxed whitespace-pre-wrap">${person.answer}</p>
-                <div class="absolute -bottom-6 -right-2 text-6xl text-yellow-400 font-serif opacity-50">"</div>
+              <!-- åç­æè¨ -->
+              <div class="bg-gray-800 text-white p-8 rounded-3xl mb-8 relative shadow-lg">
+                <div class="absolute -top-5 -left-2 text-7xl text-yellow-400 font-serif opacity-30 select-none">"</div>
+                <p class="text-3xl md:text-4xl font-black text-center leading-tight whitespace-pre-wrap py-2">${person.answer}</p>
+                <div class="absolute -bottom-10 -right-2 text-7xl text-yellow-400 font-serif opacity-30 select-none">"</div>
               </div>
 
-              <button onclick="app.vote('${person.id}')" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 text-xl font-black py-5 rounded-2xl shadow-md transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                一本！ (投票する)
-              </button>
+              ${voteButtonHtml}
             </div>
           `;
         }
       },
 
       vote: async (id) => {
+        const storageKey = `ippangp_voted_${id}`;
+        
+        // ã­ã¼ã«ã«ã¹ãã¬ã¼ã¸ã§å¶éãã§ãã¯
+        if (localStorage.getItem(storageKey)) {
+          UI.toast("ãã®åç­ã«ã¯ãã§ã«æç¥¨æ¸ã¿ã§ã");
+          return;
+        }
+
         try {
           const person = state.people.find(p => p.id === id);
           if (!person) return;
+          
           const newCount = (person.count || 0) + 1;
           const docRef = doc(db, "people", id);
           
-          // オプティミスティックUI更新（体感速度向上）
+          // ããã¯ã°ã©ã¦ã³ãã§æ´æ°
+          await updateDoc(docRef, { count: newCount });
+          
+          // æç¥¨æåã¨ãã¦ç«¯æ«ã«è¨é²
+          localStorage.setItem(storageKey, "true");
+          UI.toast("ä¸æ¬ï¼ æç¥¨ãã¾ããï¼");
+          
+          // ã­ã¼ã«ã«ã®ç¶æãæ´æ°ãã¦ããåæç» (onSnapshotãèµ°ããä½æåä¸ã®ãã)
           person.count = newCount;
           app.render();
-          UI.toast("投票しました！");
 
-          // バックグラウンドでDB更新
-          await updateDoc(docRef, { count: newCount });
         } catch (e) {
           console.error(e);
-          UI.toast("投票に失敗しました。");
+          UI.toast("éä¿¡ã¨ã©ã¼: æç¥¨ã«å¤±æãã¾ããã");
         }
       },
 
-      // 管理者モーダルの制御
       showAdminLogin: async () => {
-        const pw = await UI.password("管理者パスワードを入力してください");
+        const pw = await UI.password("ç®¡çèãã¹ã¯ã¼ããå¥åãã¦ãã ãã");
         if (pw === null) return;
         if (pw === "1919") {
           app.openAdminPanel();
         } else {
-          UI.alert("パスワードが違います");
+          UI.alert("ãã¹ã¯ã¼ããéãã¾ã");
         }
       },
 
       openAdminPanel: () => {
-        // セレクトボックスの生成
         const roundSel = document.getElementById("adminRound");
         roundSel.innerHTML = "";
         for (let i = 1; i <= state.maxRound; i++) {
-          roundSel.innerHTML += `<option value="${i}">第${i}回</option>`;
+          roundSel.innerHTML += `<option value="${i}">ç¬¬${i}å</option>`;
         }
-        if (state.currentRound) roundSel.value = state.currentRound;
-
-        const nameSel = document.getElementById("adminNameSelect");
-        nameSel.innerHTML = "";
-        if (state.people.length > 0) {
-          state.people.forEach(p => {
-            nameSel.innerHTML += `<option value="${p.id}">${p.name} (第${p.round}回)</option>`;
-          });
-        } else {
-          nameSel.innerHTML = `<option value="">メンバーなし</option>`;
+        if (state.currentRound) {
+          roundSel.value = state.currentRound;
         }
 
-        // 状態リセット
-        document.getElementById("adminNewName").value = "";
-        document.getElementById("adminAnswer").value = "";
         document.querySelector('input[name="adminMode"][value="new"]').checked = true;
         app.toggleAdminMode();
+        app.onAdminRoundChange(); // é¸æä¸­ã®åã®ãé¡ã»ç»åãèª­ã¿è¾¼ã
 
         document.getElementById("adminModal").classList.remove('hidden');
       },
@@ -434,98 +490,152 @@
         document.getElementById("adminModal").classList.add('hidden');
       },
 
+      // ç®¡çèããã«ã§åãé¸æãç´ããã¨ã
+      onAdminRoundChange: () => {
+        const roundNum = Number(document.getElementById("adminRound").value);
+        
+        // 1. ãé¡ã»ç»åã®èªåã»ãã
+        const rData = state.roundsData.find(r => r.round === roundNum);
+        document.getElementById("adminRoundTitle").value = rData && rData.title ? rData.title : "";
+        document.getElementById("adminRoundImage").value = rData && rData.imageUrl ? rData.imageUrl : "";
+
+        // 2. æ¢å­ã¡ã³ãã¼ã»ã¬ã¯ãã®çµãè¾¼ã¿
+        const nameSel = document.getElementById("adminNameSelect");
+        nameSel.innerHTML = "";
+        const participants = state.people.filter(p => p.round === roundNum);
+        
+        if (participants.length > 0) {
+          participants.forEach(p => {
+            nameSel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+          });
+        } else {
+          nameSel.innerHTML = `<option value="">(ãã®åã«ã¯ã¾ã èª°ããã¾ãã)</option>`;
+        }
+
+        // ãã©ã¼ã ã®ãªã»ãã
+        document.getElementById("adminNewName").value = "";
+        document.getElementById("adminAnswer").value = "";
+      },
+
       toggleAdminMode: () => {
         const isNew = document.querySelector('input[name="adminMode"]:checked').value === 'new';
         document.getElementById("newPersonArea").style.display = isNew ? 'block' : 'none';
         document.getElementById("updatePersonArea").style.display = !isNew ? 'block' : 'none';
       },
 
-      // 管理者データ操作
-      adminSubmit: async () => {
-        const round = Number(document.getElementById("adminRound").value);
+      // â  ãé¡ã¨ç»åãä¿å­ (roundsã³ã¬ã¯ã·ã§ã³)
+      adminSaveRound: async () => {
+        const roundNum = Number(document.getElementById("adminRound").value);
+        const title = document.getElementById("adminRoundTitle").value.trim();
+        const imageUrl = document.getElementById("adminRoundImage").value.trim();
+
+        try {
+          const docRef = doc(db, "rounds", `round_${roundNum}`);
+          await setDoc(docRef, {
+            round: roundNum,
+            title: title,
+            imageUrl: imageUrl
+          }, { merge: true });
+          
+          UI.toast(`ç¬¬${roundNum}åã®ãé¡ã»ç»åãä¿å­ãã¾ãã`);
+        } catch (e) {
+          console.error(e);
+          UI.alert("ä¿å­ã«å¤±æãã¾ããã");
+        }
+      },
+
+      // â¡ åç­ã®è¿½å /æ´æ° (peopleã³ã¬ã¯ã·ã§ã³)
+      adminSubmitAnswer: async () => {
+        const roundNum = Number(document.getElementById("adminRound").value);
         const answer = document.getElementById("adminAnswer").value.trim();
         const mode = document.querySelector('input[name="adminMode"]:checked').value;
         
-        if (!answer) {
-          UI.alert("回答を入力してください");
-          return;
-        }
+        if (!answer) return UI.alert("åç­ãå¥åãã¦ãã ãã");
 
         try {
           if (mode === 'new') {
             const name = document.getElementById("adminNewName").value.trim();
-            if (!name) return UI.alert("名前を入力してください");
+            if (!name) return UI.alert("ååãå¥åãã¦ãã ãã");
             
             await addDoc(collection(db, "people"), {
               name: name,
               answer: answer,
               count: 0,
-              round: round
+              round: roundNum
             });
-            UI.toast(`「${name}」を追加しました`);
+            UI.toast(`ã${name}ãããã®åç­ãè¿½å ãã¾ãã`);
           } else {
             const id = document.getElementById("adminNameSelect").value;
-            if (!id) return UI.alert("更新するメンバーがいません");
+            if (!id) return UI.alert("æ´æ°ããã¡ã³ãã¼ããã¾ãã");
             
             const target = state.people.find(p => p.id === id);
             await updateDoc(doc(db, "people", id), {
-              answer: answer,
-              round: round
+              answer: answer
             });
-            UI.toast(`「${target.name}」を更新しました`);
+            UI.toast(`ã${target.name}ãããã®åç­ãæ´æ°ãã¾ãã`);
           }
-          app.hideAdmin();
+          
+          document.getElementById("adminNewName").value = "";
+          document.getElementById("adminAnswer").value = "";
+          // æ´æ°å¾ãã»ã¬ã¯ãããã¯ã¹ãåæ§ç¯
+          setTimeout(app.onAdminRoundChange, 500); 
+
         } catch (e) {
           console.error(e);
-          UI.alert("保存に失敗しました。");
+          UI.alert("åç­ã®ä¿å­ã«å¤±æãã¾ããã");
         }
       },
 
-      adminDelete: async () => {
+      // åç­ã®åé¤
+      adminDeleteAnswer: async () => {
+        const mode = document.querySelector('input[name="adminMode"]:checked').value;
+        if (mode === 'new') return UI.alert("æ¢å­ã¡ã³ãã¼ã¢ã¼ãã«åãæ¿ãã¦ããé¸æãã¦ãã ãã");
+
         const id = document.getElementById("adminNameSelect").value;
-        if (!id) {
-          return UI.alert("削除するメンバーがいません");
-        }
-        const target = state.people.find(p => p.id === id);
+        if (!id) return UI.alert("åé¤ããã¡ã³ãã¼ããã¾ãã");
         
-        const ok = await UI.confirm(`「${target.name}」の投稿を本当に削除しますか？`);
+        const target = state.people.find(p => p.id === id);
+        if (!target) return;
+
+        const ok = await UI.confirm(`ã${target.name}ãããã®åç­ãæ¬å½ã«åé¤ãã¾ããï¼`);
         if (!ok) return;
 
         try {
           await deleteDoc(doc(db, "people", id));
-          UI.toast(`「${target.name}」を削除しました`);
-          app.hideAdmin();
+          UI.toast(`åé¤ãã¾ãã`);
+          setTimeout(app.onAdminRoundChange, 500);
         } catch (e) {
           console.error(e);
-          UI.alert("削除に失敗しました。");
+          UI.alert("åé¤ã«å¤±æãã¾ããã");
         }
       },
 
+      // åã®è¿½å 
       adminAddRound: async () => {
-        const input = await UI.prompt(`追加する回数を入力（現在の最大: ${state.maxRound}）`, "例: 21");
+        const input = await UI.prompt(`è¿½å ããåæ°ãå¥å\nï¼ç¾å¨ã®æå¤§ã¯ç¬¬${state.maxRound}åï¼`, "ä¾: 21");
         if (!input) return;
         
         const newRound = Number(input);
         if (isNaN(newRound) || newRound <= state.maxRound) {
-          UI.alert("現在の最大値より大きい正しい数字を入力してください");
-          return;
+          return UI.alert("ç¾å¨ã®æå¤§å¤ããå¤§ããæ­£ããæ°å­ãå¥åãã¦ãã ãã");
         }
         
+        // stateã«åæ ããã»ã¬ã¯ãããã¯ã¹ãä½ãç´ãããã«ããã«ãéãç´ã
         state.maxRound = newRound;
-        UI.toast(`第${newRound}回を追加しました`);
-        app.openAdminPanel(); // セレクトボックス更新のため再描画
-        if(state.currentView === 'rounds') app.render(); // 一覧画面も更新
+        UI.toast(`ç¬¬${newRound}åãè¿½å ãã¾ããã\nãé¡ãç»åãè¨­å®ãã¦ãã ããã`);
+        
+        const roundSel = document.getElementById("adminRound");
+        roundSel.innerHTML += `<option value="${newRound}">ç¬¬${newRound}å</option>`;
+        roundSel.value = newRound;
+        app.onAdminRoundChange();
+        
+        if (state.currentView === 'rounds') app.render(); 
       }
     };
 
-    // グローバルスコープにバインド（HTML内からの呼び出し用）
+    // ã°ã­ã¼ãã«ã¹ã³ã¼ãã«ãã¤ã³ã
     window.app = app;
-
-    // アプリ起動
-    window.addEventListener('DOMContentLoaded', () => {
-      app.init();
-    });
-
+    window.addEventListener('DOMContentLoaded', app.init);
   </script>
 </body>
 </html>
