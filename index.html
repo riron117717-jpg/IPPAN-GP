@@ -44,44 +44,6 @@ img {
   border-radius: 10px;
   margin-top: 40px;
 }
-
-/* IPPANボタン */
-.ippan-btn {
-  background: #222;
-  color: white;
-  font-size: 22px;
-  font-weight: bold;
-  border-radius: 50%;
-  width: 80px;
-  height: 80px;
-  line-height: 80px;
-  margin: 25px auto 10px;
-  cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s ease;
-}
-.ippan-btn.clicked {
-  background: #ff5252;
-  transform: scale(1.3);
-  animation: pulse 0.6s ease;
-}
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,82,82,0.7); }
-  70% { box-shadow: 0 0 0 20px rgba(255,82,82,0); }
-  100% { box-shadow: 0 0 0 0 rgba(255,82,82,0); }
-}
-
-/* 取り消しボタン */
-.cancel-btn {
-  background: #666;
-  color: white;
-  font-size: 20px;
-  padding: 12px;
-  width: 150px;
-  margin: 10px auto;
-  border-radius: 10px;
-}
-
-/* 管理者画面 */
 #adminPanel {
   display: none;
   margin-top: 20px;
@@ -116,13 +78,13 @@ input, select, textarea {
 
 <h1 id="title">IPPAN-GP</h1>
 
-<!-- 管理者画面（タイトルの下に隠す） -->
+<!-- 管理者画面 -->
 <div id="adminPanel">
   <div class="admin-box">
     <h2>管理者専用</h2>
 
     <label>第何回</label>
-    <input type="number" id="adminRound" placeholder="例：2">
+    <select id="adminRound"></select>
 
     <label>名前（既存＋新規追加）</label>
     <select id="adminNameSelect"></select>
@@ -143,8 +105,9 @@ input, select, textarea {
 <script>
 let currentRound = null;
 
-// ★ 票データ
-let people = {
+// ★ localStorageからデータ読み込み
+let storedData = localStorage.getItem("peopleData");
+let people = storedData ? JSON.parse(storedData) : {
   "カースト最下層さん": { answer: "へ〜まだあるんだ", count: 0 },
   "受水槽室さん": { answer: "すいません隣の席も埋まってるんですよ〜。", count: 0 },
   "お紅茶さん": { answer: "突然すみません、王様ゲームやりませんか", count: 0 },
@@ -154,8 +117,9 @@ let people = {
   "玉野筋男さん": { answer: "実は青いところが本体です。", count: 0 }
 };
 
-// ★ 押したかどうか（取り消し対応）
-let voted = {};
+function saveData() {
+  localStorage.setItem("peopleData", JSON.stringify(people));
+}
 
 function showRounds() {
   currentRound = null;
@@ -179,11 +143,18 @@ function adminLogin() {
 }
 
 function showAdmin() {
-  // 既存の名前をセレクトに入れる
-  let sel = document.getElementById("adminNameSelect");
-  sel.innerHTML = "";
+  // 第何回ドロップダウン生成
+  let roundSel = document.getElementById("adminRound");
+  roundSel.innerHTML = "";
+  for (let i = 1; i <= 20; i++) {
+    roundSel.innerHTML += `<option value="${i}">第${i}回</option>`;
+  }
+
+  // 名前リスト生成
+  let nameSel = document.getElementById("adminNameSelect");
+  nameSel.innerHTML = "";
   for (let name in people) {
-    sel.innerHTML += `<option value="${name}">${name}</option>`;
+    nameSel.innerHTML += `<option value="${name}">${name}</option>`;
   }
 
   document.getElementById("adminPanel").style.display = "block";
@@ -207,6 +178,7 @@ function adminAdd() {
   }
 
   people[finalName] = { answer: answer, count: people[finalName]?.count || 0 };
+  saveData(); // ★ 保存
 
   alert(`第${round}回に「${finalName}」を登録しました！`);
 }
@@ -239,44 +211,8 @@ function showPerson(name) {
     <br>
     <img src="IMG_8067.jpeg">
     <div class="answer">${data.answer}</div>
-
-    <div class="ippan-btn" onclick="vote('${name}', this)">IPPAN</div>
-    <div class="cancel-btn" onclick="cancelVote('${name}')">取り消し</div>
-
     <button onclick="showRound(${currentRound})">戻る</button>
   `;
-}
-
-function vote(name, btn) {
-  if (voted[name]) {
-    alert("すでに押してます。取り消しボタンを使ってね");
-    return;
-  }
-
-  voted[name] = true;
-  people[name].count++;
-
-  btn.classList.add("clicked");
-  btn.innerText = "★";
-
-  setTimeout(() => {
-    btn.innerText = "IPPAN";
-    btn.classList.remove("clicked");
-  }, 800);
-
-  showPerson(name);
-}
-
-function cancelVote(name) {
-  if (!voted[name]) {
-    alert("まだ押してないよ");
-    return;
-  }
-
-  voted[name] = false;
-  people[name].count--;
-
-  showPerson(name);
 }
 </script>
 
