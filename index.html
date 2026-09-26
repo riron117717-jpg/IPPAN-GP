@@ -15,17 +15,13 @@ body {
   flex-direction: column;
   justify-content: center;
 }
-h1 {
-  font-size: 60px;
-  margin-bottom: 10px;
-}
 button {
   display: block;
   width: 85%;
   max-width: 350px;
-  margin: 25px auto;
-  padding: 22px;
-  font-size: 28px;
+  margin: 30px auto;
+  padding: 24px;
+  font-size: 30px;
   border-radius: 12px;
   border: none;
   background: #333;
@@ -33,27 +29,25 @@ button {
 }
 .name {
   font-weight: normal;
-  font-size: 22px;
+  font-size: 24px;
   text-align: left;
-  margin-left: 20px;
+  margin-left: 25px;
 }
 .answer {
-  margin-top: 30px;
-  font-size: 38px;
+  margin-top: 35px;
+  font-size: 42px;
   font-weight: bold;
 }
 img {
   width: 100%;
-  max-width: 600px;
+  max-width: 650px;
   border-radius: 10px;
-  margin-top: 30px;
+  margin-top: 40px;
 }
 </style>
 </head>
 
 <body>
-
-<h1 id="title">IPPAN-GP</h1>
 
 <div id="menu">
   <button onclick="showRounds()">スタート</button>
@@ -64,7 +58,6 @@ let currentRound = null;
 
 function showRounds() {
   currentRound = null;
-  document.getElementById("title").innerText = "回を選択";
   let html = "";
   for (let i = 1; i <= 20; i++) {
     html += `<button onclick="showRound(${i})">第${i}回</button>`;
@@ -74,7 +67,6 @@ function showRounds() {
 
 function showRound(n) {
   currentRound = n;
-  document.getElementById("title").innerText = `第${n}回`;
 
   if (n === 2) {
     document.getElementById("menu").innerHTML = `
@@ -99,8 +91,6 @@ function showRound(n) {
 }
 
 function showPerson(name) {
-  document.getElementById("title").innerText = name;
-
   let answer = "";
   if (name === "カースト最下層さん") answer = "へ〜まだあるんだ";
   if (name === "受水槽室さん") answer = "すいません隣の席も埋まってるんですよ〜。";
