@@ -8,43 +8,40 @@ body {
   font-family: sans-serif;
   text-align: center;
   background: #f5f5f5;
-  padding: 20px;
+  padding: 0;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 h1 {
-  font-size: 52px;
-  margin-top: 40px;
+  font-size: 60px;
+  margin-bottom: 30px;
 }
 button {
   display: block;
   width: 85%;
   max-width: 350px;
-  margin: 12px auto;
-  padding: 18px;
-  font-size: 24px;
+  margin: 20px auto;
+  padding: 22px;
+  font-size: 28px;
   border-radius: 12px;
   border: none;
   background: #333;
   color: white;
 }
-#content {
-  margin-top: 40px;
-  text-align: left;
-  max-width: 550px;
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 24px;
-}
 .name {
   font-weight: bold;
   margin-top: 20px;
-  font-size: 26px;
+  font-size: 30px;
 }
 .answer {
-  margin-bottom: 10px;
-  font-size: 24px;
+  margin-top: 20px;
+  font-size: 28px;
 }
 img {
-  width: 100%;
+  width: 90%;
   max-width: 450px;
   border-radius: 10px;
   margin-top: 20px;
@@ -60,26 +57,19 @@ img {
   <button onclick="showRounds()">スタート</button>
 </div>
 
-<div id="content"></div>
-
 <script>
 let currentRound = null;
 
-// ★スタート → 回選択画面
 function showRounds() {
   currentRound = null;
   document.getElementById("title").innerText = "回を選択";
-
   let html = "";
   for (let i = 1; i <= 20; i++) {
     html += `<button onclick="showRound(${i})">第${i}回</button>`;
   }
-
   document.getElementById("menu").innerHTML = html;
-  document.getElementById("content").innerHTML = "";
 }
 
-// ★第○回 → 写真＋名前一覧
 function showRound(n) {
   currentRound = n;
   document.getElementById("title").innerText = `第${n}回`;
@@ -87,8 +77,6 @@ function showRound(n) {
   if (n === 2) {
     document.getElementById("menu").innerHTML = `
       <img src="IMG_8067.jpeg">
-      <div class="name">写真で一言</div>
-
       <button onclick="showPerson('カースト最下層さん')">カースト最下層さん</button>
       <button onclick="showPerson('受水槽室さん')">受水槽室さん</button>
       <button onclick="showPerson('お紅茶さん')">お紅茶さん</button>
@@ -96,20 +84,16 @@ function showRound(n) {
       <button onclick="showPerson('一郎2留手帳持ちさん')">一郎2留手帳持ちさん</button>
       <button onclick="showPerson('アハンアン・虹寝るしーさん')">アハンアン・虹寝るしーさん</button>
       <button onclick="showPerson('玉野筋男さん')">玉野筋男さん</button>
-
       <button onclick="showRounds()">戻る</button>
     `;
-    document.getElementById("content").innerHTML = "";
   } else {
     document.getElementById("menu").innerHTML = `
-      <div>第${n}回のデータはまだありません。</div>
+      <div style="font-size:28px;">第${n}回のデータはまだありません。</div>
       <button onclick="showRounds()">戻る</button>
     `;
-    document.getElementById("content").innerHTML = "";
   }
 }
 
-// ★名前 → 写真＋回答
 function showPerson(name) {
   document.getElementById("title").innerText = name;
 
@@ -124,12 +108,9 @@ function showPerson(name) {
 
   document.getElementById("menu").innerHTML = `
     <img src="IMG_8067.jpeg">
-    <div class="name">写真で一言</div>
     <div class="answer">${answer}</div>
-
     <button onclick="showRound(${currentRound})">戻る</button>
   `;
-  document.getElementById("content").innerHTML = "";
 }
 </script>
 
