@@ -15,6 +15,10 @@ body {
   flex-direction: column;
   justify-content: center;
 }
+h1 {
+  font-size: 60px;
+  margin-bottom: 10px;
+}
 button {
   display: block;
   width: 85%;
@@ -49,6 +53,8 @@ img {
 
 <body>
 
+<h1 id="title">IPPAN-GP</h1>
+
 <div id="menu">
   <button onclick="showRounds()">スタート</button>
 </div>
@@ -58,6 +64,7 @@ let currentRound = null;
 
 function showRounds() {
   currentRound = null;
+  document.getElementById("title").innerText = "IPPAN-GP";
   let html = "";
   for (let i = 1; i <= 20; i++) {
     html += `<button onclick="showRound(${i})">第${i}回</button>`;
@@ -67,6 +74,7 @@ function showRounds() {
 
 function showRound(n) {
   currentRound = n;
+  document.getElementById("title").innerText = `第${n}回`;
 
   if (n === 2) {
     document.getElementById("menu").innerHTML = `
@@ -91,6 +99,8 @@ function showRound(n) {
 }
 
 function showPerson(name) {
+  document.getElementById("title").innerText = "IPPAN-GP"; // タイトル復活
+
   let answer = "";
   if (name === "カースト最下層さん") answer = "へ〜まだあるんだ";
   if (name === "受水槽室さん") answer = "すいません隣の席も埋まってるんですよ〜。";
