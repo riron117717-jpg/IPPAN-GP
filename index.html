@@ -177,7 +177,8 @@
       maxRound: 20,    // 最大ラウンド
       currentView: "rounds",
       currentRound: null,
-      currentPersonId: null
+      currentPersonId: null,
+      isReady: false
     };
 
     /* ------------------------------
@@ -194,6 +195,7 @@
       modal(msg, config = {}) {
         return new Promise(resolve => {
           const modal = document.getElementById("dialogModal");
+          const content = document.getElementById("dialogContent");
           const msgEl = document.getElementById("dialogMessage");
           const inputEl = document.getElementById("dialogInput");
           const cancelBtn = document.getElementById("dialogCancel");
@@ -206,30 +208,47 @@
           cancelBtn.classList.add("hidden");
 
           if (config.type === "prompt" || config.type === "password") {
+            inputEl.type = config.type === "password" ? "password" : "text";
             inputEl.classList.remove("hidden");
-            if (config.type === "password") inputEl.type = "password";
+            inputEl.placeholder = config.placeholder || "";
+            inputEl.focus();
           }
 
-          if (config.cancel) {
+          if (config.showCancel) {
             cancelBtn.classList.remove("hidden");
           }
 
-          modal.classList.remove("hidden");
-          setTimeout(() => modal.classList.remove("opacity-0"), 10);
-
-          cancelBtn.onclick = () => {
+          const cleanup = () => {
             modal.classList.add("opacity-0");
-            setTimeout(() => modal.classList.add("hidden"), 200);
-            resolve(null);
+            setTimeout(() => {
+              modal.classList.add("hidden");
+              cancelBtn.onclick = null;
+              confirmBtn.onclick = null;
+            }, 200);
           };
 
+          cancelBtn.onclick = () => { cleanup(); resolve(null); };
           confirmBtn.onclick = () => {
-            modal.classList.add("opacity-0");
-            setTimeout(() => modal.classList.add("hidden"), 200);
-            resolve(inputEl.value || true);
+            let val = true;
+            if (config.type === 'prompt' || config.type === 'password') {
+              val = inputEl.value;
+            }
+            cleanup();
+            resolve(val);
           };
+
+          modal.classList.remove("hidden");
+          setTimeout(() => {
+            modal.classList.remove("opacity-0");
+            content.classList.remove("scale-95");
+          }, 10);
         });
-      }
+      },
+
+      alert(msg) { return UI.modal(msg); },
+      confirm(msg) { return UI.modal(msg, { showCancel: true }); },
+      prompt(msg, placeholder) { return UI.modal(msg, { type: 'prompt', showCancel: true, placeholder }); },
+      password(msg) { return UI.modal(msg, { type: 'password', showCancel: true }); }
     };
 
     /* ------------------------------
@@ -237,31 +256,51 @@
     ------------------------------ */
     const app = {
 
-      /* ---- 画面切り替え ---- */
-      showRounds() {
-        state.currentView = "rounds";
+      init() {
+        const peopleRef = collection(db, "people");
+        onSnapshot(peopleRef, (snapshot) => {
+          state.people = [];
+          let foundMax = 20;
+
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            state.people.push({ id: docSnap.id, ...data });
+            if (data.round > foundMax) foundMax = data.round;
+          });
+
+          state.maxRound = Math.max(state.maxRound, foundMax);
+          state.isReady = true;
+          app.render();
+        });
+      },
+
+      navigate(view, param = null) {
+        state.currentView = view;
+        if (view === "roundDetail") state.currentRound = param;
+        if (view === "personDetail") state.currentPersonId = param;
         app.render();
       },
 
-      showRound(round) {
-        state.currentRound = round;
-        state.currentView = "roundDetail";
-        app.render();
-      },
+      render() {
+        if (!state.isReady) return;
+        const container = document.getElementById("appContainer");
 
-      showPerson(id) {
-        state.currentPersonId = id;
-        state.currentView = "personDetail";
-        app.render();
+        if (state.currentView === "rounds") {
+          container.innerHTML = app.templates.rounds();
+        } else if (state.currentView === "roundDetail") {
+          container.innerHTML = app.templates.roundDetail(state.currentRound);
+        } else if (state.currentView === "personDetail") {
+          const person = state.people.find(p => p.id === state.currentPersonId);
+          container.innerHTML = app.templates.personDetail(person);
+        }
       },
 
       /* ---- 管理者 ---- */
       showAdminLogin() {
-        UI.modal("管理者パスワードを入力", { type: "password" })
-          .then(pw => {
-            if (pw === "1919") app.showAdmin();
-            else UI.toast("パスワードが違います");
-          });
+        UI.password("管理者パスワードを入力").then(pw => {
+          if (pw === "1919") app.showAdmin();
+          else UI.toast("パスワードが違います");
+        });
       },
 
       showAdmin() {
@@ -275,41 +314,4 @@
 
       toggleAdminMode() {
         const mode = document.querySelector("input[name='adminMode']:checked").value;
-        document.getElementById("newPersonArea").classList.toggle("hidden", mode !== "new");
-        document.getElementById("updatePersonArea").classList.toggle("hidden", mode !== "update");
-      },
-
-      adminSubmit() {
-        const mode = document.querySelector("input[name='adminMode']:checked").value;
-        const round = Number(document.getElementById("adminRound").value);
-        const answer = document.getElementById("adminAnswer").value.trim();
-
-        let name = "";
-        if (mode === "new") {
-          name = document.getElementById("adminNewName").value.trim();
-        } else {
-          name = document.getElementById("adminNameSelect").value;
-        }
-
-        if (!name || !answer || !round) {
-          UI.toast("入力が不足しています");
-          return;
-        }
-
-        const existing = state.people.find(p => p.name === name);
-
-        if (existing) {
-          updateDoc(doc(db, "people", existing.id), { answer, round });
-          UI.toast("更新しました");
-        } else {
-          addDoc(collection(db, "people"), { name, answer, count: 0, round });
-          UI.toast("追加しました");
-        }
-      },
-
-      adminDelete() {
-        const id = document.getElementById("adminNameSelect").value;
-        const target = state.people.find(p => p.id === id);
-        if (!target) return;
-
-        deleteDoc(doc(db
+        document.getElementById("newPersonArea").classList.toggle("
