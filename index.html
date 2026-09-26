@@ -42,23 +42,24 @@ button {
   margin-bottom: 10px;
   font-size: 18px;
 }
+img {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- タイトル画面 -->
 <h1 id="title">IPPAN-GP</h1>
-
 <div id="menu">
   <button onclick="showRounds()">スタート</button>
 </div>
-
-<!-- 中身表示エリア -->
 <div id="content"></div>
 
 <script>
-// ラウンド選択画面
 function showRounds() {
   document.getElementById("title").innerText = "回を選択";
   let html = "";
@@ -69,37 +70,44 @@ function showRounds() {
   document.getElementById("content").innerHTML = "";
 }
 
-// ラウンドごとの内容
 function showRound(n) {
   document.getElementById("title").innerText = `第${n}回`;
-
   if (n === 2) {
-    document.getElementById("content").innerHTML = `
-      <div class="name">カースト最下層さん</div>
-      <div class="answer">へ〜まだあるんだ</div>
-
-      <div class="name">受水槽室さん</div>
-      <div class="answer">すいません隣の席も埋まってるんですよ〜。</div>
-
-      <div class="name">お紅茶さん</div>
-      <div class="answer">突然すみません、王様ゲームやりませんか</div>
-
-      <div class="name">ジズエ4545さん</div>
-      <div class="answer">太「リス」ぎ</div>
-
-      <div class="name">一郎2留手帳持ちさん</div>
-      <div class="answer">グリフィンドールだったピーター・ペティグリュー</div>
-
-      <div class="name">アハンアン・虹寝るしーさん</div>
-      <div class="answer">いや、モルモットじゃなくて森本です。</div>
-
-      <div class="name">玉野筋男さん</div>
-      <div class="answer">実は青いところが本体です。</div>
+    let html = `
+      <button onclick="showPerson('カースト最下層さん')">カースト最下層さん</button>
+      <button onclick="showPerson('受水槽室さん')">受水槽室さん</button>
+      <button onclick="showPerson('お紅茶さん')">お紅茶さん</button>
+      <button onclick="showPerson('ジズエ4545さん')">ジズエ4545さん</button>
+      <button onclick="showPerson('一郎2留手帳持ちさん')">一郎2留手帳持ちさん</button>
+      <button onclick="showPerson('アハンアン・虹寝るしーさん')">アハンアン・虹寝るしーさん</button>
+      <button onclick="showPerson('玉野筋男さん')">玉野筋男さん</button>
     `;
+    document.getElementById("menu").innerHTML = html;
+    document.getElementById("content").innerHTML = "";
   } else {
-    document.getElementById("content").innerHTML =
-      `<div>第${n}回のデータはまだありません。</div>`;
+    document.getElementById("menu").innerHTML = "";
+    document.getElementById("content").innerHTML = `<div>第${n}回のデータはまだありません。</div>`;
   }
+}
+
+function showPerson(name) {
+  document.getElementById("title").innerText = name;
+  let answer = "";
+  if (name === "カースト最下層さん") answer = "へ〜まだあるんだ";
+  if (name === "受水槽室さん") answer = "すいません隣の席も埋まってるんですよ〜。";
+  if (name === "お紅茶さん") answer = "突然すみません、王様ゲームやりませんか";
+  if (name === "ジズエ4545さん") answer = "太「リス」ぎ";
+  if (name === "一郎2留手帳持ちさん") answer = "グリフィンドールだったピーター・ペティグリュー";
+  if (name === "アハンアン・虹寝るしーさん") answer = "いや、モルモットじゃなくて森本です。";
+  if (name === "玉野筋男さん") answer = "実は青いところが本体です。";
+
+  document.getElementById("menu").innerHTML = "";
+  document.getElementById("content").innerHTML = `
+    <img src="IMG_8067.jpeg" alt="画像で一言">
+    <div class="name">画像で一言</div>
+    <div class="answer">${answer}</div>
+    <button onclick="showRounds()">戻る</button>
+  `;
 }
 </script>
 
