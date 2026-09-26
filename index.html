@@ -11,17 +11,17 @@ body {
   padding: 20px;
 }
 h1 {
-  font-size: 48px;
-  margin-top: 60px;
+  font-size: 52px;
+  margin-top: 40px;
 }
 button {
   display: block;
-  width: 80%;
-  max-width: 300px;
-  margin: 10px auto;
-  padding: 15px;
-  font-size: 20px;
-  border-radius: 10px;
+  width: 85%;
+  max-width: 350px;
+  margin: 12px auto;
+  padding: 18px;
+  font-size: 24px;
+  border-radius: 12px;
   border: none;
   background: #333;
   color: white;
@@ -29,22 +29,23 @@ button {
 #content {
   margin-top: 40px;
   text-align: left;
-  max-width: 500px;
+  max-width: 550px;
   margin-left: auto;
   margin-right: auto;
+  font-size: 24px;
 }
 .name {
   font-weight: bold;
   margin-top: 20px;
-  font-size: 20px;
+  font-size: 26px;
 }
 .answer {
   margin-bottom: 10px;
-  font-size: 18px;
+  font-size: 24px;
 }
 img {
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   border-radius: 10px;
   margin-top: 20px;
 }
@@ -60,7 +61,11 @@ img {
 <div id="content"></div>
 
 <script>
+let currentRound = null;
+
+// 回選択画面
 function showRounds() {
+  currentRound = null;
   document.getElementById("title").innerText = "回を選択";
   let html = "";
   for (let i = 1; i <= 20; i++) {
@@ -70,46 +75,19 @@ function showRounds() {
   document.getElementById("content").innerHTML = "";
 }
 
+// 回を押した後の画面（写真＋名前一覧）
 function showRound(n) {
+  currentRound = n;
   document.getElementById("title").innerText = `第${n}回`;
+
   if (n === 2) {
-    let html = `
+    document.getElementById("menu").innerHTML = `
+      <img src="IMG_8067.jpeg">
+      <div class="name">写真で一言</div>
+
       <button onclick="showPerson('カースト最下層さん')">カースト最下層さん</button>
       <button onclick="showPerson('受水槽室さん')">受水槽室さん</button>
       <button onclick="showPerson('お紅茶さん')">お紅茶さん</button>
       <button onclick="showPerson('ジズエ4545さん')">ジズエ4545さん</button>
       <button onclick="showPerson('一郎2留手帳持ちさん')">一郎2留手帳持ちさん</button>
-      <button onclick="showPerson('アハンアン・虹寝るしーさん')">アハンアン・虹寝るしーさん</button>
-      <button onclick="showPerson('玉野筋男さん')">玉野筋男さん</button>
-    `;
-    document.getElementById("menu").innerHTML = html;
-    document.getElementById("content").innerHTML = "";
-  } else {
-    document.getElementById("menu").innerHTML = "";
-    document.getElementById("content").innerHTML = `<div>第${n}回のデータはまだありません。</div>`;
-  }
-}
-
-function showPerson(name) {
-  document.getElementById("title").innerText = name;
-  let answer = "";
-  if (name === "カースト最下層さん") answer = "へ〜まだあるんだ";
-  if (name === "受水槽室さん") answer = "すいません隣の席も埋まってるんですよ〜。";
-  if (name === "お紅茶さん") answer = "突然すみません、王様ゲームやりませんか";
-  if (name === "ジズエ4545さん") answer = "太「リス」ぎ";
-  if (name === "一郎2留手帳持ちさん") answer = "グリフィンドールだったピーター・ペティグリュー";
-  if (name === "アハンアン・虹寝るしーさん") answer = "いや、モルモットじゃなくて森本です。";
-  if (name === "玉野筋男さん") answer = "実は青いところが本体です。";
-
-  document.getElementById("menu").innerHTML = "";
-  document.getElementById("content").innerHTML = `
-    <img src="IMG_8067.jpeg" alt="画像で一言">
-    <div class="name">画像で一言</div>
-    <div class="answer">${answer}</div>
-    <button onclick="showRounds()">戻る</button>
-  `;
-}
-</script>
-
-</body>
-</html>
+      <button onclick="showPerson('アハンアン・虹寝るしーさん')">
