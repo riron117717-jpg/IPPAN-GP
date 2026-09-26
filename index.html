@@ -54,40 +54,4 @@ img {
 
 <body>
 
-<h1 id="title">IPPAN-GP</h1>
-<div id="menu">
-  <button onclick="showRounds()">スタート</button>
-</div>
-<div id="content"></div>
-
-<script>
-let currentRound = null;
-
-// 回選択画面
-function showRounds() {
-  currentRound = null;
-  document.getElementById("title").innerText = "回を選択";
-  let html = "";
-  for (let i = 1; i <= 20; i++) {
-    html += `<button onclick="showRound(${i})">第${i}回</button>`;
-  }
-  document.getElementById("menu").innerHTML = html;
-  document.getElementById("content").innerHTML = "";
-}
-
-// 回を押した後の画面（写真＋名前一覧）
-function showRound(n) {
-  currentRound = n;
-  document.getElementById("title").innerText = `第${n}回`;
-
-  if (n === 2) {
-    document.getElementById("menu").innerHTML = `
-      <img src="IMG_8067.jpeg">
-      <div class="name">写真で一言</div>
-
-      <button onclick="showPerson('カースト最下層さん')">カースト最下層さん</button>
-      <button onclick="showPerson('受水槽室さん')">受水槽室さん</button>
-      <button onclick="showPerson('お紅茶さん')">お紅茶さん</button>
-      <button onclick="showPerson('ジズエ4545さん')">ジズエ4545さん</button>
-      <button onclick="showPerson('一郎2留手帳持ちさん')">一郎2留手帳持ちさん</button>
-      <button onclick="showPerson('アハンアン・虹寝るしーさん')">
+<h1 id="title">
