@@ -102,118 +102,149 @@ input, select, textarea {
   <button onclick="showRounds()">スタート</button>
 </div>
 
-<script>
-let currentRound = null;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-// ★ localStorageからデータ読み込み
-let storedData = localStorage.getItem("peopleData");
-let people = storedData ? JSON.parse(storedData) : {
-  "カースト最下層さん": { answer: "へ〜まだあるんだ", count: 0 },
-  "受水槽室さん": { answer: "すいません隣の席も埋まってるんですよ〜。", count: 0 },
-  "お紅茶さん": { answer: "突然すみません、王様ゲームやりませんか", count: 0 },
-  "ジズエ4545さん": { answer: "太「リス」ぎ", count: 0 },
-  "一郎2留手帳持ちさん": { answer: "グリフィンドールだったピーター・ペティグリュー", count: 0 },
-  "アハンアン・虹寝るしーさん": { answer: "いや、モルモットじゃなくて森本です。", count: 0 },
-  "玉野筋男さん": { answer: "実は青いところが本体です。", count: 0 }
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBbtqNnXTnTUywEh_ygQbR-Sbf6C0vXxxY",
+    authDomain: "ippan-gp.firebaseapp.com",
+    projectId: "ippan-gp",
+    storageBucket: "ippan-gp.firebasestorage.app",
+    messagingSenderId: "194881427223",
+    appId: "1:194881427223:web:0989f067db479fe0994952",
+    measurementId: "G-3LWRC1MHCG"
+  };
 
-function saveData() {
-  localStorage.setItem("peopleData", JSON.stringify(people));
-}
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-function showRounds() {
-  currentRound = null;
-  document.getElementById("title").innerText = "IPPAN-GP";
+  let people = {};
+  let currentRound = null;
 
-  let html = "";
-  for (let i = 1; i <= 20; i++) {
-    html += `<button onclick="showRound(${i})">第${i}回</button>`;
-  }
-  html += `<button style="background:#555;" onclick="adminLogin()">管理者専用</button>`;
-  document.getElementById("menu").innerHTML = html;
-}
-
-function adminLogin() {
-  let pw = prompt("パスワードを入力してください");
-  if (pw === "1919") {
-    showAdmin();
-  } else {
-    alert("パスワードが違います");
-  }
-}
-
-function showAdmin() {
-  // 第何回ドロップダウン生成
-  let roundSel = document.getElementById("adminRound");
-  roundSel.innerHTML = "";
-  for (let i = 1; i <= 20; i++) {
-    roundSel.innerHTML += `<option value="${i}">第${i}回</option>`;
+  async function loadPeople() {
+    const querySnapshot = await getDocs(collection(db, "people"));
+    people = {};
+    querySnapshot.forEach((docSnap) => {
+      const d = docSnap.data();
+      people[d.name] = { answer: d.answer, count: d.count || 0, round: d.round };
+    });
+    showRounds();
   }
 
-  // 名前リスト生成
-  let nameSel = document.getElementById("adminNameSelect");
-  nameSel.innerHTML = "";
-  for (let name in people) {
-    nameSel.innerHTML += `<option value="${name}">${name}</option>`;
-  }
+  async function adminAdd() {
+    const round = document.getElementById("adminRound").value;
+    const selectedName = document.getElementById("adminNameSelect").value;
+    const newName = document.getElementById("adminNewName").value.trim();
+    const answer = document.getElementById("adminAnswer").value.trim();
 
-  document.getElementById("adminPanel").style.display = "block";
-}
+    let finalName = newName || selectedName;
 
-function hideAdmin() {
-  document.getElementById("adminPanel").style.display = "none";
-}
-
-function adminAdd() {
-  const round = document.getElementById("adminRound").value;
-  const selectedName = document.getElementById("adminNameSelect").value;
-  const newName = document.getElementById("adminNewName").value.trim();
-  const answer = document.getElementById("adminAnswer").value.trim();
-
-  let finalName = newName || selectedName;
-
-  if (!round || !finalName || !answer) {
-    alert("全部入力してね");
-    return;
-  }
-
-  people[finalName] = { answer: answer, count: people[finalName]?.count || 0 };
-  saveData(); // ★ 保存
-
-  alert(`第${round}回に「${finalName}」を登録しました！`);
-}
-
-function showRound(n) {
-  currentRound = n;
-  document.getElementById("title").innerText = `第${n}回`;
-
-  if (n === 2) {
-    let html = `<div class="name">第${n}回</div><br><img src="IMG_8067.jpeg">`;
-    for (let name in people) {
-      html += `<button onclick="showPerson('${name}')">${name} <span class="count">(${people[name].count})</span></button>`;
+    if (!round || !finalName || !answer) {
+      alert("全部入力してね");
+      return;
     }
+
+    // 既存データを探す
+    const querySnapshot = await getDocs(collection(db, "people"));
+    let foundId = null;
+    querySnapshot.forEach((docSnap) => {
+      if (docSnap.data().name === finalName) {
+        foundId = docSnap.id;
+      }
+    });
+
+    if (foundId) {
+      await updateDoc(doc(db, "people", foundId), {
+        answer: answer,
+        round: Number(round)
+      });
+    } else {
+      await addDoc(collection(db, "people"), {
+        name: finalName,
+        answer: answer,
+        count: 0,
+        round: Number(round)
+      });
+    }
+
+    alert(`第${round}回に「${finalName}」を登録しました！`);
+    loadPeople();
+  }
+
+  function adminLogin() {
+    let pw = prompt("パスワードを入力してください");
+    if (pw === "1919") {
+      showAdmin();
+    } else {
+      alert("パスワードが違います");
+    }
+  }
+
+  function showAdmin() {
+    let roundSel = document.getElementById("adminRound");
+    roundSel.innerHTML = "";
+    for (let i = 1; i <= 20; i++) {
+      roundSel.innerHTML += `<option value="${i}">第${i}回</option>`;
+    }
+
+    let nameSel = document.getElementById("adminNameSelect");
+    nameSel.innerHTML = "";
+    for (let name in people) {
+      nameSel.innerHTML += `<option value="${name}">${name}</option>`;
+    }
+
+    document.getElementById("adminPanel").style.display = "block";
+  }
+
+  function hideAdmin() {
+    document.getElementById("adminPanel").style.display = "none";
+  }
+
+  function showRounds() {
+    currentRound = null;
+    document.getElementById("title").innerText = "IPPAN-GP";
+
+    let html = "";
+    for (let i = 1; i <= 20; i++) {
+      html += `<button onclick="showRound(${i})">第${i}回</button>`;
+    }
+    html += `<button style="background:#555;" onclick="adminLogin()">管理者専用</button>`;
+    document.getElementById("menu").innerHTML = html;
+  }
+
+  function showRound(n) {
+    currentRound = n;
+    document.getElementById("title").innerText = `第${n}回`;
+
+    let html = "";
+
+    html += `<div class="name">第${n}回</div><br><img src="IMG_8067.jpeg">`;
+
+    for (let name in people) {
+      if (people[name].round == n) {
+        html += `<button onclick="showPerson('${name}')">${name} <span class="count">(${people[name].count})</span></button>`;
+      }
+    }
+
     html += `<button onclick="showRounds()">戻る</button>`;
     document.getElementById("menu").innerHTML = html;
-  } else {
+  }
+
+  function showPerson(name) {
+    let data = people[name];
+
+    document.getElementById("title").innerText = "IPPAN-GP";
     document.getElementById("menu").innerHTML = `
-      <div style="font-size:28px;">第${n}回のデータはまだありません。</div>
-      <button onclick="showRounds()">戻る</button>
+      <div class="name">${name} <span class="count">(${data.count})</span></div>
+      <br>
+      <img src="IMG_8067.jpeg">
+      <div class="answer">${data.answer}</div>
+      <button onclick="showRound(${currentRound})">戻る</button>
     `;
   }
-}
 
-function showPerson(name) {
-  document.getElementById("title").innerText = "IPPAN-GP";
-  let data = people[name];
-
-  document.getElementById("menu").innerHTML = `
-    <div class="name">${name} <span class="count">(${data.count})</span></div>
-    <br>
-    <img src="IMG_8067.jpeg">
-    <div class="answer">${data.answer}</div>
-    <button onclick="showRound(${currentRound})">戻る</button>
-  `;
-}
+  window.onload = loadPeople;
 </script>
 
 </body>
