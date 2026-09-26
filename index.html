@@ -1,24 +1,107 @@
-if (n === 2) {
-  document.getElementById("content").innerHTML = `
-    <div class="name">カースト最下層さん</div>
-    <div class="answer">へ〜まだあるんだ</div>
-
-    <div class="name">受水槽室さん</div>
-    <div class="answer">すいません隣の席も埋まってるんですよ〜。</div>
-
-    <div class="name">お紅茶さん</div>
-    <div class="answer">突然すみません、王様ゲームやりませんか</div>
-
-    <div class="name">ジズエ4545さん</div>
-    <div class="answer">太「リス」ぎ</div>
-
-    <div class="name">一郎2留手帳持ちさん</div>
-    <div class="answer">グリフィンドールだったピーター・ペティグリュー</div>
-
-    <div class="name">アハンアン・虹寝るしーさん</div>
-    <div class="answer">いや、モルモットじゃなくて森本です。</div>
-
-    <div class="name">玉野筋男さん</div>
-    <div class="answer">実は青いところが本体です。</div>
-  `;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>IPPAN-GP</title>
+<style>
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background: #f5f5f5;
+  padding: 20px;
 }
+h1 {
+  font-size: 48px;
+  margin-top: 60px;
+}
+button {
+  display: block;
+  width: 80%;
+  max-width: 300px;
+  margin: 10px auto;
+  padding: 15px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: none;
+  background: #333;
+  color: white;
+}
+#content {
+  margin-top: 40px;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.name {
+  font-weight: bold;
+  margin-top: 20px;
+  font-size: 20px;
+}
+.answer {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- タイトル画面 -->
+<h1 id="title">IPPAN-GP</h1>
+
+<div id="menu">
+  <button onclick="showRounds()">スタート</button>
+</div>
+
+<!-- 中身表示エリア -->
+<div id="content"></div>
+
+<script>
+// ラウンド選択画面
+function showRounds() {
+  document.getElementById("title").innerText = "回を選択";
+  let html = "";
+  for (let i = 1; i <= 20; i++) {
+    html += `<button onclick="showRound(${i})">第${i}回</button>`;
+  }
+  document.getElementById("menu").innerHTML = html;
+  document.getElementById("content").innerHTML = "";
+}
+
+// ラウンドごとの内容
+function showRound(n) {
+  document.getElementById("title").innerText = `第${n}回`;
+
+  if (n === 2) {
+    document.getElementById("content").innerHTML = `
+      <div class="name">カースト最下層さん</div>
+      <div class="answer">へ〜まだあるんだ</div>
+
+      <div class="name">受水槽室さん</div>
+      <div class="answer">すいません隣の席も埋まってるんですよ〜。</div>
+
+      <div class="name">お紅茶さん</div>
+      <div class="answer">突然すみません、王様ゲームやりませんか</div>
+
+      <div class="name">ジズエ4545さん</div>
+      <div class="answer">太「リス」ぎ</div>
+
+      <div class="name">一郎2留手帳持ちさん</div>
+      <div class="answer">グリフィンドールだったピーター・ペティグリュー</div>
+
+      <div class="name">アハンアン・虹寝るしーさん</div>
+      <div class="answer">いや、モルモットじゃなくて森本です。</div>
+
+      <div class="name">玉野筋男さん</div>
+      <div class="answer">実は青いところが本体です。</div>
+    `;
+  } else {
+    document.getElementById("content").innerHTML =
+      `<div>第${n}回のデータはまだありません。</div>`;
+  }
+}
+</script>
+
+</body>
+</html>
