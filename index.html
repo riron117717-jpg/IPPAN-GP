@@ -141,14 +141,14 @@ input, select, textarea {
     showRounds();
   }
 
-  // 管理者追加・更新
+  // ★ 修正版 adminAdd()
   async function adminAdd() {
-    const round = document.getElementById("adminRound").value;
-    const selectedName = document.getElementById("adminNameSelect").value;
+    const round = Number(document.getElementById("adminRound").value);
+    const selectedName = document.getElementById("adminNameSelect").value || "";
     const newName = document.getElementById("adminNewName").value.trim();
     const answer = document.getElementById("adminAnswer").value.trim();
 
-    let finalName = newName || selectedName;
+    const finalName = newName !== "" ? newName : selectedName;
 
     if (!round || !finalName || !answer) {
       alert("全部入力してね");
@@ -159,7 +159,8 @@ input, select, textarea {
     let foundId = null;
 
     querySnapshot.forEach((docSnap) => {
-      if (docSnap.data().name === finalName) {
+      const data = docSnap.data();
+      if (data.name === finalName) {
         foundId = docSnap.id;
       }
     });
@@ -167,18 +168,20 @@ input, select, textarea {
     if (foundId) {
       await updateDoc(doc(db, "people", foundId), {
         answer: answer,
-        round: Number(round)
+        round: round
       });
+      alert(`「${finalName}」の回答を更新しました！`);
     } else {
       await addDoc(collection(db, "people"), {
         name: finalName,
         answer: answer,
         count: 0,
-        round: Number(round)
+        round: round
       });
+      alert(`第${round}回に「${finalName}」を追加しました！`);
     }
 
-    alert(`第${round}回に「${finalName}」を登録しました！`);
+    clearAdminInputs();
     loadPeople();
   }
 
@@ -266,7 +269,7 @@ input, select, textarea {
     document.getElementById("adminPanel").style.display = "none";
   }
 
-  // ★ 画像は第2回だけ表示
+  // ★ 第2回だけ画像表示
   function showRound(n) {
     currentRound = n;
     document.getElementById("title").innerText = `第${n}回`;
@@ -319,5 +322,3 @@ input, select, textarea {
 
 </body>
 </html>
-
-
