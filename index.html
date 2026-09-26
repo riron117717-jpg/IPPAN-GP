@@ -259,6 +259,15 @@ input, select, textarea {
   }
 
   window.onload = loadPeople;
+
+  // ★ onclickで使う関数をグローバル化（これがないと動かない）
+  window.showRounds = showRounds;
+  window.showRound = showRound;
+  window.showPerson = showPerson;
+  window.adminLogin = adminLogin;
+  window.adminAdd = adminAdd;
+  window.vote = vote;
+
 </script>
 
 </body>
