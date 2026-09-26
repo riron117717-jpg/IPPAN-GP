@@ -95,6 +95,9 @@ input, select, textarea {
 
     <button onclick="adminAdd()">追加 / 更新</button>
     <button onclick="hideAdmin()">閉じる</button>
+    <button onclick="clearAdminInputs()">入力クリア</button>
+    <button onclick="deletePerson()">選択した投稿を削除</button>
+    <button onclick="addRound()">お題を追加</button>
   </div>
 </div>
 
@@ -104,7 +107,7 @@ input, select, textarea {
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBbtqNnXTnTUywEh_ygQbR-Sbf6C0vXxxY",
@@ -121,15 +124,20 @@ input, select, textarea {
 
   let people = {};
   let currentRound = null;
+  let maxRound = 20;
 
   // Firestoreから読み込み
   async function loadPeople() {
     const querySnapshot = await getDocs(collection(db, "people"));
     people = {};
+    maxRound = 20;
+
     querySnapshot.forEach((docSnap) => {
       const d = docSnap.data();
       people[d.name] = { answer: d.answer, count: d.count || 0, round: d.round };
+      if (d.round > maxRound) maxRound = d.round;
     });
+
     showRounds();
   }
 
@@ -149,6 +157,7 @@ input, select, textarea {
 
     const querySnapshot = await getDocs(collection(db, "people"));
     let foundId = null;
+
     querySnapshot.forEach((docSnap) => {
       if (docSnap.data().name === finalName) {
         foundId = docSnap.id;
@@ -173,7 +182,50 @@ input, select, textarea {
     loadPeople();
   }
 
-  // 投票クラウド化
+  // 入力クリア
+  function clearAdminInputs() {
+    document.getElementById("adminNewName").value = "";
+    document.getElementById("adminAnswer").value = "";
+  }
+
+  // 投稿削除
+  async function deletePerson() {
+    const selectedName = document.getElementById("adminNameSelect").value;
+    if (!selectedName) {
+      alert("削除する名前を選んでね");
+      return;
+    }
+
+    const ok = confirm(`「${selectedName}」を本当に削除しますか？`);
+    if (!ok) return;
+
+    const querySnapshot = await getDocs(collection(db, "people"));
+    let deleted = false;
+
+    querySnapshot.forEach(async (docSnap) => {
+      if (docSnap.data().name === selectedName) {
+        await deleteDoc(doc(db, "people", docSnap.id));
+        deleted = true;
+      }
+    });
+
+    alert(`「${selectedName}」を削除しました`);
+    loadPeople();
+  }
+
+  // お題追加
+  function addRound() {
+    const newRound = Number(prompt("追加する回数を入力（例：21）"));
+    if (!newRound || newRound <= maxRound) {
+      alert("正しい数字を入力してね");
+      return;
+    }
+    maxRound = newRound;
+    alert(`第${newRound}回を追加しました`);
+    showRounds();
+  }
+
+  // 投票
   async function vote(name) {
     const querySnapshot = await getDocs(collection(db, "people"));
     querySnapshot.forEach(async (docSnap) => {
@@ -197,7 +249,7 @@ input, select, textarea {
   function showAdmin() {
     let roundSel = document.getElementById("adminRound");
     roundSel.innerHTML = "";
-    for (let i = 1; i <= 20; i++) {
+    for (let i = 1; i <= maxRound; i++) {
       roundSel.innerHTML += `<option value="${i}">第${i}回</option>`;
     }
 
@@ -214,24 +266,16 @@ input, select, textarea {
     document.getElementById("adminPanel").style.display = "none";
   }
 
-  function showRounds() {
-    currentRound = null;
-    document.getElementById("title").innerText = "IPPAN-GP";
-
-    let html = "";
-    for (let i = 1; i <= 20; i++) {
-      html += `<button onclick="showRound(${i})">第${i}回</button>`;
-    }
-    html += `<button style="background:#555;" onclick="adminLogin()">管理者専用</button>`;
-    document.getElementById("menu").innerHTML = html;
-  }
-
+  // ★ 画像は第2回だけ表示
   function showRound(n) {
     currentRound = n;
     document.getElementById("title").innerText = `第${n}回`;
 
-    let html = "";
-    html += `<div class="name">第${n}回</div><br><img src="IMG_8067.jpeg">`;
+    let html = `<div class="name">第${n}回</div><br>`;
+
+    if (n === 2) {
+      html += `<img src="IMG_8067.jpeg"><br>`;
+    }
 
     for (let name in people) {
       if (people[name].round == n) {
@@ -260,13 +304,16 @@ input, select, textarea {
 
   window.onload = loadPeople;
 
-  // ★ onclickで使う関数をグローバル化（これがないと動かない）
+  // グローバル化
   window.showRounds = showRounds;
   window.showRound = showRound;
   window.showPerson = showPerson;
   window.adminLogin = adminLogin;
   window.adminAdd = adminAdd;
   window.vote = vote;
+  window.clearAdminInputs = clearAdminInputs;
+  window.deletePerson = deletePerson;
+  window.addRound = addRound;
 
 </script>
 
