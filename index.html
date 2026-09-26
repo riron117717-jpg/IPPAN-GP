@@ -17,13 +17,13 @@ body {
 }
 h1 {
   font-size: 60px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 button {
   display: block;
   width: 85%;
   max-width: 350px;
-  margin: 20px auto;
+  margin: 25px auto;
   padding: 22px;
   font-size: 28px;
   border-radius: 12px;
@@ -32,19 +32,21 @@ button {
   color: white;
 }
 .name {
-  font-weight: bold;
-  margin-top: 20px;
-  font-size: 30px;
+  font-weight: normal;
+  font-size: 22px;
+  text-align: right;
+  margin-right: 20px;
 }
 .answer {
-  margin-top: 20px;
-  font-size: 28px;
+  margin-top: 25px;
+  font-size: 34px;
+  font-weight: bold;
 }
 img {
-  width: 90%;
-  max-width: 450px;
+  width: 95%;
+  max-width: 550px;
   border-radius: 10px;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 </style>
 </head>
@@ -76,6 +78,8 @@ function showRound(n) {
 
   if (n === 2) {
     document.getElementById("menu").innerHTML = `
+      <div class="name">第${n}回</div>
+      <br>
       <img src="IMG_8067.jpeg">
       <button onclick="showPerson('カースト最下層さん')">カースト最下層さん</button>
       <button onclick="showPerson('受水槽室さん')">受水槽室さん</button>
@@ -107,6 +111,8 @@ function showPerson(name) {
   if (name === "玉野筋男さん") answer = "実は青いところが本体です。";
 
   document.getElementById("menu").innerHTML = `
+    <div class="name">${name}</div>
+    <br>
     <img src="IMG_8067.jpeg">
     <div class="answer">${answer}</div>
     <button onclick="showRound(${currentRound})">戻る</button>
