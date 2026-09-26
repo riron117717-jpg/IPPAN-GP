@@ -8,24 +8,20 @@ body {
   font-family: sans-serif;
   text-align: center;
   background: #f5f5f5;
-  padding: 0;
   margin: 0;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 40px 0; /* 上下に余白を追加して見切れ防止 */
 }
 h1 {
   font-size: 60px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 button {
   display: block;
   width: 85%;
   max-width: 350px;
-  margin: 30px auto;
-  padding: 24px;
-  font-size: 30px;
+  margin: 20px auto;
+  padding: 22px;
+  font-size: 28px;
   border-radius: 12px;
   border: none;
   background: #333;
@@ -48,6 +44,25 @@ img {
   border-radius: 10px;
   margin-top: 40px;
 }
+.admin {
+  margin-top: 60px;
+  background: #444;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+input, textarea {
+  width: 90%;
+  font-size: 20px;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
 </style>
 </head>
 
@@ -59,8 +74,27 @@ img {
   <button onclick="showRounds()">スタート</button>
 </div>
 
+<div id="adminPanel" style="display:none;">
+  <div class="admin">
+    <h2>管理者専用：回答追加</h2>
+    <input type="text" id="newName" placeholder="名前を入力">
+    <textarea id="newAnswer" placeholder="回答を入力"></textarea>
+    <button onclick="addPerson()">追加</button>
+    <button onclick="hideAdmin()">閉じる</button>
+  </div>
+</div>
+
 <script>
 let currentRound = null;
+let people = {
+  "カースト最下層さん": "へ〜まだあるんだ",
+  "受水槽室さん": "すいません隣の席も埋まってるんですよ〜。",
+  "お紅茶さん": "突然すみません、王様ゲームやりませんか",
+  "ジズエ4545さん": "太「リス」ぎ",
+  "一郎2留手帳持ちさん": "グリフィンドールだったピーター・ペティグリュー",
+  "アハンアン・虹寝るしーさん": "いや、モルモットじゃなくて森本です。",
+  "玉野筋男さん": "実は青いところが本体です。"
+};
 
 function showRounds() {
   currentRound = null;
@@ -69,6 +103,7 @@ function showRounds() {
   for (let i = 1; i <= 20; i++) {
     html += `<button onclick="showRound(${i})">第${i}回</button>`;
   }
+  html += `<button style="background:#555;" onclick="showAdmin()">管理者専用</button>`;
   document.getElementById("menu").innerHTML = html;
 }
 
@@ -77,19 +112,12 @@ function showRound(n) {
   document.getElementById("title").innerText = `第${n}回`;
 
   if (n === 2) {
-    document.getElementById("menu").innerHTML = `
-      <div class="name">第${n}回</div>
-      <br>
-      <img src="IMG_8067.jpeg">
-      <button onclick="showPerson('カースト最下層さん')">カースト最下層さん</button>
-      <button onclick="showPerson('受水槽室さん')">受水槽室さん</button>
-      <button onclick="showPerson('お紅茶さん')">お紅茶さん</button>
-      <button onclick="showPerson('ジズエ4545さん')">ジズエ4545さん</button>
-      <button onclick="showPerson('一郎2留手帳持ちさん')">一郎2留手帳持ちさん</button>
-      <button onclick="showPerson('アハンアン・虹寝るしーさん')">アハンアン・虹寝るしーさん</button>
-      <button onclick="showPerson('玉野筋男さん')">玉野筋男さん</button>
-      <button onclick="showRounds()">戻る</button>
-    `;
+    let html = `<div class="name">第${n}回</div><br><img src="IMG_8067.jpeg">`;
+    for (let name in people) {
+      html += `<button onclick="showPerson('${name}')">${name}</button>`;
+    }
+    html += `<button onclick="showRounds()">戻る</button>`;
+    document.getElementById("menu").innerHTML = html;
   } else {
     document.getElementById("menu").innerHTML = `
       <div style="font-size:28px;">第${n}回のデータはまだありません。</div>
@@ -99,17 +127,8 @@ function showRound(n) {
 }
 
 function showPerson(name) {
-  document.getElementById("title").innerText = "IPPAN-GP"; // タイトル復活
-
-  let answer = "";
-  if (name === "カースト最下層さん") answer = "へ〜まだあるんだ";
-  if (name === "受水槽室さん") answer = "すいません隣の席も埋まってるんですよ〜。";
-  if (name === "お紅茶さん") answer = "突然すみません、王様ゲームやりませんか";
-  if (name === "ジズエ4545さん") answer = "太「リス」ぎ";
-  if (name === "一郎2留手帳持ちさん") answer = "グリフィンドールだったピーター・ペティグリュー";
-  if (name === "アハンアン・虹寝るしーさん") answer = "いや、モルモットじゃなくて森本です。";
-  if (name === "玉野筋男さん") answer = "実は青いところが本体です。";
-
+  document.getElementById("title").innerText = "IPPAN-GP";
+  let answer = people[name] || "回答が未登録です。";
   document.getElementById("menu").innerHTML = `
     <div class="name">${name}</div>
     <br>
@@ -117,6 +136,27 @@ function showPerson(name) {
     <div class="answer">${answer}</div>
     <button onclick="showRound(${currentRound})">戻る</button>
   `;
+}
+
+function showAdmin() {
+  document.getElementById("adminPanel").style.display = "block";
+}
+
+function hideAdmin() {
+  document.getElementById("adminPanel").style.display = "none";
+}
+
+function addPerson() {
+  const name = document.getElementById("newName").value.trim();
+  const answer = document.getElementById("newAnswer").value.trim();
+  if (name && answer) {
+    people[name] = answer;
+    alert(`「${name}」を追加しました！`);
+    document.getElementById("newName").value = "";
+    document.getElementById("newAnswer").value = "";
+  } else {
+    alert("名前と回答を入力してください。");
+  }
 }
 </script>
 
